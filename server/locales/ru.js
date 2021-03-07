@@ -1,26 +1,6 @@
-// @ts-check
-
 module.exports = {
   translation: {
-    appName: 'Fastify Шаблон',
-    flash: {
-      session: {
-        create: {
-          success: 'Вы залогинены',
-          error: 'Неправильный емейл или пароль',
-        },
-        delete: {
-          success: 'Вы разлогинены',
-        },
-      },
-      users: {
-        create: {
-          error: 'Не удалось зарегистрировать',
-          success: 'Пользователь успешно зарегистрирован',
-        },
-      },
-      authError: 'Доступ запрещён! Пожалуйста, авторизируйтесь.',
-    },
+    appName: 'Менеджер задач',
     layouts: {
       application: {
         users: 'Пользователи',
@@ -34,15 +14,6 @@ module.exports = {
         new: {
           signIn: 'Вход',
           submit: 'Войти',
-        },
-      },
-      users: {
-        id: 'ID',
-        email: 'Email',
-        createdAt: 'Дата создания',
-        new: {
-          submit: 'Сохранить',
-          signUp: 'Регистрация',
         },
       },
       welcome: {
