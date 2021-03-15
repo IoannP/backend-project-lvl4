@@ -23,6 +23,13 @@ module.exports = {
           more: 'Узнать Больше',
         },
       },
+      users: {
+        firstName: 'Имя',
+        lastName: 'Фамилия',
+        email: 'Email',
+        password: 'Пароль',
+        button: 'Сохранить',
+      },
     },
   },
 };

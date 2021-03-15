@@ -79,6 +79,7 @@ export default () => {
   setupLocalization();
   setupStaticAssets(app);
   setupViews(app);
+  addPlugins(app);
   addRoutes(app);
 
   return app;

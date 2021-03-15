@@ -1,0 +1,19 @@
+extends ../layouts/application.pug
+
+block content
+  h1.mb-5.mt-5= 'Регистрация'
+  form
+    label(for="firstName" class="form-label")= t('views.users.firstName')
+    .mb-3
+      input(type="text" class="form-control" id="firstName")
+    label(for="lastName" class="form-label")= t('views.users.lastName')
+    .mb-3
+      input(type="text" class="form-control" id="lastName")
+    label(for="email" class="form-label")= t('views.users.email')
+    .mb-3
+      input(type="text" class="form-control" id="email")
+    label(for="password" class="form-label")= t('views.users.password')
+    .mb-3
+      input(type="text" class="form-control" id="password")
+    .start-0
+      button(type="submit" class="btn btn-primary")= t('views.users.button')

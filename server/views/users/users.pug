@@ -1,0 +1,13 @@
+extends ../layouts/application.pug
+
+block content
+  table.table.table-hover
+    thead
+      tr
+        th(scope='col')= t('views.users.firstName')
+        th(scope='col')= t('views.users.lastName')
+    tbody
+      each user in users
+        tr
+          th= user.firstName
+          th= user.lastName
