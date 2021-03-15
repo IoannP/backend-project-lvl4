@@ -1,5 +1,3 @@
-// @ts-check
-
 import welcome from './welcome.js';
 
 const controllers = [welcome];

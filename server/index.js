@@ -1,5 +1,6 @@
 import path from 'path';
 import fastify from 'fastify';
+import fastifyObjectionjs from 'fastify-objectionjs';
 import fastifyStatic from 'fastify-static';
 import pointOfView from 'point-of-view';
 import Pug from 'pug';
@@ -9,12 +10,15 @@ import webpackConfig from '../webpack.config.babel.js';
 
 import addRoutes from './routes/index.js';
 import getHelpers from './helpers/index.js';
+import knexConfig from '../knexfile';
+import models from './models';
 
 const mode = process.env.NODE_ENV || 'development';
 const isProduction = mode === 'production';
 const isDevelopment = mode === 'development';
+require('dotenv').config();
 
-const setUpViews = (app) => {
+const setupViews = (app) => {
   const { devServer } = webpackConfig;
   const devHost = `http://${devServer.host}:${devServer.port}`;
   const domain = isDevelopment ? devHost : '';
@@ -48,7 +52,14 @@ const setupLocalization = () => {
     });
 };
 
-const setUpStaticAssets = (app) => {
+const addPlugins = (app) => {
+  app.register(fastifyObjectionjs, {
+    knexConfig: knexConfig[mode],
+    models,
+  });
+};
+
+const setupStaticAssets = (app) => {
   const pathPublic = isProduction
     ? path.join(__dirname, '..', 'public')
     : path.join(__dirname, '..', 'dist', 'public');
@@ -66,8 +77,8 @@ export default () => {
   });
 
   setupLocalization();
-  setUpStaticAssets(app);
-  setUpViews(app);
+  setupStaticAssets(app);
+  setupViews(app);
   addRoutes(app);
 
   return app;

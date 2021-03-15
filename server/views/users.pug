@@ -1,0 +1,15 @@
+extends ../layouts/application.pug
+
+block content
+  table.table.table-hover
+    thead
+      tr
+        th(scope='col') First name
+        th(scope='col') Last name
+    each user in users
+      tbody
+        tr
+          th user.first_name
+          th user.last_name
+
+  
