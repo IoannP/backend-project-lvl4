@@ -1,17 +1,29 @@
+// @ts-check
+
 import path from 'path';
 import fastify from 'fastify';
 import fastifyObjectionjs from 'fastify-objectionjs';
+import fastifySession from 'fastify-secure-session';
+import fastifyPassport from 'fastify-passport';
+import fastifyErrorPage from 'fastify-error-page';
+import fastifyMethodOverride from 'fastify-method-override';
+import { plugin as fastifyReverseRoutes } from 'fastify-reverse-routes';
+import fastifyFormbody from 'fastify-formbody';
 import fastifyStatic from 'fastify-static';
 import pointOfView from 'point-of-view';
 import Pug from 'pug';
 import i18next from 'i18next';
+import qs from 'qs';
 import ru from './locales/ru.js';
+
+// @ts-ignore
 import webpackConfig from '../webpack.config.babel.js';
 
 import addRoutes from './routes/index.js';
 import getHelpers from './helpers/index.js';
 import knexConfig from '../knexfile';
 import models from './models';
+import FormStrategy from './lib/passpot_strategies/form_strategy.js';
 
 const mode = process.env.NODE_ENV || 'development';
 const isProduction = mode === 'production';
@@ -57,6 +69,40 @@ const addPlugins = (app) => {
     knexConfig: knexConfig[mode],
     models,
   });
+  app.register(fastifyFormbody, { parser: qs.parse });
+  app.register(fastifyReverseRoutes);
+  app.register(fastifyErrorPage);
+  app.register(fastifySession, {
+    secret: process.env.SESSION_KEY,
+    cookie: {
+      path: '/',
+    },
+  });
+  app.register(fastifyPassport.initialize());
+  app.register(fastifyPassport.secureSession());
+  fastifyPassport.registerUserSerializer((user) => Promise.resolve(user));
+  fastifyPassport.registerUserDeserializer(
+    (user) => app.objection.models.user.query().findById(user.id),
+  );
+  fastifyPassport.use(new FormStrategy('form', app));
+  app.register(fastifyMethodOverride);
+  app.decorate('fp', fastifyPassport);
+  app.decorate('authenticate', (...args) => fastifyPassport.authenticate(
+    'form',
+    {
+      failureRedirect: app.reverse('root'),
+      failureFlash: i18next.t('flash.authError'),
+    },
+  // @ts-ignore
+  )(...args));
+};
+
+const addHooks = (app) => {
+  app.addHook('preHandler', async (req, reply) => {
+    reply.locals = {
+      isAuthenticated: () => req.isAuthenticated(),
+    };
+  });
 };
 
 const setupStaticAssets = (app) => {
@@ -81,6 +127,7 @@ export default () => {
   setupViews(app);
   addPlugins(app);
   addRoutes(app);
+  addHooks(app);
 
   return app;
 };

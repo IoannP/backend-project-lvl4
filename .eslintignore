@@ -1,4 +1,3 @@
 /node_modules
 /dist
-managerProjectDB
-.env
+rough.js

@@ -1,3 +1,5 @@
+include ../mixins/mixins.pug
+
 doctype html
 html(lang="en")
   head
@@ -7,20 +9,30 @@ html(lang="en")
     meta(name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no")
   body.d-flex.flex-column.min-vh-100
     nav.navbar.navbar-expand-lg.navbar-dark.bg-dark.mb-3
-      a.navbar-brand= t('appName')  
+      a.navbar-brand(href=route('root'))= t('appName')  
       button.navbar-toggler(data-toggle="collapse" data-target="#navbarToggleExternalContent")
         span.navbar-toggler-icon
       .collapse.navbar-collapse(id="navbarToggleExternalContent")
         ul.navbar-nav.mr-auto
           li.nav-item
-            a.nav-link(aria-current="page" href="/users")= t('layouts.application.users')
+            a.nav-link(href=route('users'))= t('layouts.application.users')
         ul.navbar-nav
+          if isAuthenticated()
             li.nav-item
-              a.nav-link= t('layouts.application.signIn')
+              +buttonTo(route('session'), 'delete')(class="btn nav-link" value=t('layouts.application.signOut'))
+          else
             li.nav-item
-              a.nav-link(aria-current="page" href="/users/new")= t('layouts.application.signUp')
+              a.nav-link(href=route('newSession'))= t('layouts.application.signIn')
+            li.nav-item
+              a.nav-link(href=route('usersNew'))= t('layouts.application.signUp')
     .container.wrapper.flex-grow-1
+
+      each messages, type in reply.flash() || []
+        each message in messages
+          div.alert(class=`alert-${getAlertClass(type)}`)= message
+
       h1.my-4
+        block header
       block content
 
     footer

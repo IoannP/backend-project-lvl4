@@ -4,10 +4,18 @@ block content
   table.table.table-hover
     thead
       tr
-        th(scope='col')= t('views.users.firstName')
-        th(scope='col')= t('views.users.lastName')
+        th(scope='col')= t('views.users.list.id')
+        th(scope='col')= t('views.users.list.fullname')
+        th(scope='col')= t('views.users.list.email')
+        th(scope='col')= t('views.users.list.dateCreated')
+        th
     tbody
       each user in users
         tr
-          th= user.firstName
-          th= user.lastName
+          td= user.id
+          td= `${user.firstname} ${user.lastname}`
+          td= user.email
+          td= user.dateCreated
+          td
+            a(href=`/users/${user.id}/edit`)= t('views.users.list.edit')
+              +buttonTo(`/users/${user.id}`, 'delete')(value=t('views.users.list.delete') class="btn btn-link")

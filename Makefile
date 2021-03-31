@@ -4,9 +4,6 @@ install:
 build:
 	npm run build
 
-prepare:
-	cp -n .env.example .env || true
-
 start:
 	heroku local -f Procfile.dev
 
@@ -20,4 +17,7 @@ lint:
 	npx eslint .
 
 test:
-	npm test -s
+	npm test
+
+test-coverage:
+	npm test -- --coverage
