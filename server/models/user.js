@@ -1,3 +1,4 @@
+import path from 'path';
 import { Model } from 'objection';
 import objectionUnique from 'objection-unique';
 import objectionPassword from 'objection-password';
@@ -21,6 +22,19 @@ export default class User extends unique(password(Model)) {
         password: { type: 'string', minLength: 7, maxLength: 255 },
         date_created: { type: 'string' },
         date_updated: { type: 'string' },
+      },
+    };
+  }
+
+  static get relationMappings() {
+    return {
+      status: {
+        relation: Model.HasOneRelation,
+        modelClass: path.join(__dirname, 'status'),
+        join: {
+          from: 'users.id',
+          to: 'statuses.user_id',
+        },
       },
     };
   }
