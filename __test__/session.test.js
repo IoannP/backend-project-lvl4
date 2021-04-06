@@ -1,7 +1,7 @@
 import getApp from '../server/index.js';
-import { getRandomUser, insertUser } from './helpers.js';
+import { getRandomUserData, insertUser } from './helpers.js';
 
-describe('test users', () => {
+describe('test sessions', () => {
   let app;
   let knex;
   let testuser;
@@ -9,7 +9,10 @@ describe('test users', () => {
   beforeAll(async () => {
     app = await getApp();
     knex = app.objection.knex;
-    testuser = getRandomUser();
+    testuser = getRandomUserData();
+  });
+
+  beforeEach(async () => {
     await knex.migrate.latest();
     await insertUser(app, testuser);
   });

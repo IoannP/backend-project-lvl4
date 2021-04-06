@@ -15,7 +15,7 @@ block content
           td= user.id
           td= `${user.firstname} ${user.lastname}`
           td= user.email
-          td= user.createdAt
+          td= formatDate(user.createdAt)
           td
             a(href=`/users/${user.id}/edit`)= t('views.users.list.edit')
             +buttonTo(`/users/${user.id}`, 'delete')(value=t('views.users.list.delete') class="btn btn-link")

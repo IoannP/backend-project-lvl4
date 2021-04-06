@@ -11,6 +11,10 @@ export default class Status extends unique(Model) {
     return 'statuses';
   }
 
+  async $beforeUpdate() {
+    this.updatedAt = new Date().toLocaleString();
+  }
+
   static get jsonSchema() {
     return {
       type: 'object',

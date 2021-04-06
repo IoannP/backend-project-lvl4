@@ -7,19 +7,23 @@ export default (app) => app
     return reply;
   })
   .get('/users/new', { name: 'usersNew' }, async (req, reply) => {
-    reply.render('users/new');
+    const user = new app.objection.models.user();
+    reply.render('users/new', { user });
     return reply;
   })
   .post('/users', async (req, reply) => {
     try {
       const user = await app.objection.models.user.fromJson(req.body.data);
+
       await app.objection.models.user.query().insert(user);
+
       req.flash('info', i18next.t('flash.users.create.success'));
       reply.redirect(app.reverse('root'));
       return reply;
-    } catch ({ data }) {
+    } catch (error) {
+      console.log(error);
       req.flash('error', i18next.t('flash.users.create.error'));
-      reply.render('users/new', { user: req.body.data, errors: data });
+      reply.render('users/new', { user: req.body.data, errors: error.data });
       return reply;
     }
   })
@@ -34,7 +38,9 @@ export default (app) => app
     try {
       const patchForm = await app.objection.models.user.fromJson(req.body.data);
       const user = await app.objection.models.user.query().findById(id);
+
       await user.$query().patch(patchForm);
+
       req.flash('info', i18next.t('flash.users.edit.success'));
       reply.redirect('/users');
       return reply;

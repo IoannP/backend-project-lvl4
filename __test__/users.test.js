@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import getApp from '../server/index.js';
-import { getRandomUser, insertUser } from './helpers.js';
+import { getRandomUserData, insertUser } from './helpers.js';
 
 describe('test users', () => {
   let app;
@@ -12,7 +12,7 @@ describe('test users', () => {
     app = await getApp();
     knex = app.objection.knex;
     models = app.objection.models;
-    testuser = getRandomUser();
+    testuser = getRandomUserData();
   });
 
   beforeEach(async () => {
@@ -39,19 +39,20 @@ describe('test users', () => {
   });
 
   it('create', async () => {
-    // const response = await app.inject({
-    //   method: 'POST',
-    //   url: app.reverse('users'),
-    //   payload: {
-    //     data: JSON.stringify(testuser),
-    //   },
-    // });
+    const newUser = getRandomUserData();
+    const response = await app.inject({
+      method: 'POST',
+      url: app.reverse('users'),
+      payload: {
+        data: newUser,
+      },
+    });
 
-    // expect(response.statusCode).toBe(302);
-    const expected = { ..._.omit(testuser, 'password') };
+    expect(response.statusCode).toBe(302);
+    const expected = { ..._.omit(newUser, 'password') };
 
-    const user = await models.user.query().findOne({ email: testuser.email });
-    const passwordValid = await user.verifyPassword(testuser.password);
+    const user = await models.user.query().findOne({ email: newUser.email });
+    const passwordValid = await user.verifyPassword(newUser.password);
 
     expect(passwordValid).toBeTruthy();
     expect(user).toMatchObject(expected);
@@ -67,15 +68,15 @@ describe('test users', () => {
     };
 
     await user.$query().patch(updateForm);
-    // const response = await app.inject({
-    //   method: 'PATCH',
-    //   url: `/users/${user.id}`,
-    //   payload: {
-    //     data: updateForm,
-    //   },
-    // });
+    const response = await app.inject({
+      method: 'PATCH',
+      url: `/users/${user.id}`,
+      payload: {
+        data: updateForm,
+      },
+    });
 
-    // expect(response.statusCode).toBe(302);
+    expect(response.statusCode).toBe(302);
 
     const expected = { ..._.omit(updateForm, 'password') };
 

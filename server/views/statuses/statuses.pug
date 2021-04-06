@@ -14,7 +14,7 @@ block content
         tr
           td= status.id
           td= status.name
-          td= status.createdAt
+          td= formatDate(status.createdAt)
           td
-            a(href='#')= t('views.status.list.edit')
-            +buttonTo('#', 'delete')(value=t('views.status.list.delete') class="btn btn-link")
+            a(href=`/statuses/${status.id}/edit`)= t('views.status.list.edit')
+            +buttonTo(`/statuses/${status.id}`, 'delete')(value=t('views.status.list.delete') class="btn btn-link")
