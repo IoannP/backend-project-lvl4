@@ -5,6 +5,7 @@ module.exports = {
       application: {
         users: 'Пользователи',
         statuses: 'Статусы',
+        tasks: 'Задачи',
         signIn: 'Вход',
         signUp: 'Регистрация',
         signOut: 'Выход',
@@ -70,6 +71,46 @@ module.exports = {
           submit: 'Изменить',
         },
       },
+      task: {
+        new: {
+          create: 'Создание задачи',
+          name: 'Наименование',
+          description: 'Описание',
+          status: 'Статус',
+          performer: 'Исполнитель',
+          marking: 'Метки',
+          submit: 'Создать',
+        },
+        list: {
+          create: 'Создать задачу',
+          id: 'ID',
+          name: 'Наименование',
+          status: 'Статус',
+          author: 'Автор',
+          performer: 'Исполнитель',
+          dateCreated: 'Дата создания',
+          edit: 'Изменить',
+          delete: 'Удалить',
+        },
+        edit: {
+          edit: 'Изменение задачи',
+          name: 'Наименование',
+          description: 'Описание',
+          status: 'Статус',
+          performer: 'Исполнитель',
+          marking: 'Метки',
+          submit: 'Изменить',
+        },
+        view: {
+          author: 'Автор',
+          performer: 'Исполнитель',
+          status: 'Статус',
+          createdAt: 'Дата создания',
+          labels: 'Метки',
+          edit: 'Изменить',
+          delete: 'Удалить',
+        },
+      },
     },
     flash: {
       session: {
@@ -107,6 +148,20 @@ module.exports = {
         delete: {
           error: 'Не удалось изменить удалить статус',
           success: 'Статус успешно удалён',
+        },
+      },
+      tasks: {
+        create: {
+          error: 'Не удалось создать задачу',
+          success: 'Задача успешно создана',
+        },
+        edit: {
+          error: 'Не удалось изменить задачу',
+          success: 'Задача успешно изменена',
+        },
+        delete: {
+          error: 'Задачу может удалить только её автор',
+          success: 'Задача успешно удалена',
         },
       },
       authError: 'Доступ запрещён! Пожалуйста, авторизируйтесь.',

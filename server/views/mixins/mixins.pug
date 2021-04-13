@@ -1,6 +1,7 @@
 - const getInputName = (property) => `data[${property}]`
 - const getInputId = (property) => `data_${property}`
 
+
 mixin formFor(entity = null)
   form&attributes(attributes)
     block
@@ -22,7 +23,28 @@ mixin input(entity, propertyName, label, errors = {})
     if !_.isEmpty(propertyErrors)
       .invalid-feedback= propertyErrors.map(({ message }) => message).join('. ')
 
-
+mixin select(entity, entityList, propertyName, label, errors = {})
+  - propertyErrors = _.get(errors, propertyName)
+  - classLine = 'form-control' + (_.isUndefined(propertyErrors) ? '' : ' is-invalid')
+  - inputId = getInputId(propertyName)
+  .form-group(class=(errors[propertyName] && 'has-danger'))
+    label(
+      for= inputId
+    )= label
+    select(
+      id=inputId
+      name=getInputName(propertyName)
+      class=classLine
+    )&attributes(attributes)
+      option
+      each value in entityList
+        if isSameId(value, propertyName, entity)
+          option(value=value.id selected)= getEntityName(value, propertyName)
+        else
+          option(value=value.id)= getEntityName(value, propertyName)
+    if !_.isEmpty(propertyErrors)
+      .invalid-feedback= propertyErrors.map(({ message }) => message).join('. ')
+  
 mixin submit(form = null)
   .form-group
     input(class='btn btn-primary' type='submit')&attributes(attributes)
@@ -31,3 +53,8 @@ mixin buttonTo(action, method)
   form(action=action, method="post")
     input(name="_method" type="hidden" value=method)
     input(type='submit')&attributes(attributes)
+  
+mixin submitPatch()
+  .form-group
+    input(name="_method" type="hidden" value="patch")
+    input(class='btn btn-primary' type='submit')&attributes(attributes)

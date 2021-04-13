@@ -6,15 +6,17 @@ const migrations = {
 
 module.exports = {
   development: {
-    client: 'sqlite3',
+    client: 'pg',
     connection: {
-      filename: './managerProjectDB.db',
+      user: 'ioann',
+      password: process.env.DEV_DB_PASSWORD,
+      database: 'manager_test',
     },
     useNullAsDefault: true,
     migrations,
   },
   test: {
-    client: 'sqlite3',
+    client: 'pg',
     connection: ':memory:',
     useNullAsDefault: true,
     migrations,

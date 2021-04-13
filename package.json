@@ -54,11 +54,11 @@
       "objection": "^2.2.15",
       "objection-password": "^3.0.0",
       "objection-unique": "^1.2.1",
+      "pg": "^8.5.1",
       "pino-pretty": "^4.7.1",
       "point-of-view": "^4.14.0",
       "pug": "^3.0.2",
       "qs": "^6.10.0",
-      "sqlite3": "^5.0.2",
       "webpack": "^5.27.0"
    },
    "devDependencies": {

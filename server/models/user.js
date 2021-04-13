@@ -11,6 +11,10 @@ export default class User extends unique(password(Model)) {
     return 'users';
   }
 
+  getFullName() {
+    return `${this.firstname} ${this.lastname}`;
+  }
+
   static get jsonSchema() {
     return {
       type: 'object',
@@ -29,11 +33,27 @@ export default class User extends unique(password(Model)) {
   static get relationMappings() {
     return {
       status: {
-        relation: Model.HasOneRelation,
+        relation: Model.HasManyRelation,
         modelClass: path.join(__dirname, 'status'),
         join: {
           from: 'users.id',
           to: 'statuses.user_id',
+        },
+      },
+      author: {
+        relation: Model.HasManyRelation,
+        modelClass: path.join(__dirname, 'task'),
+        join: {
+          from: 'users.id',
+          to: 'tasks.author_id',
+        },
+      },
+      performer: {
+        relation: Model.HasManyRelation,
+        modelClass: path.join(__dirname, 'task'),
+        join: {
+          from: 'users.id',
+          to: 'tasks.performer_id',
         },
       },
     };

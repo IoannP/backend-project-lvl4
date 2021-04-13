@@ -95,6 +95,50 @@ const addPlugins = (app) => {
     },
   // @ts-ignore
   )(...args));
+
+  app.decorate('container', new Map());
+
+  app.decorateRequest('errors', (data = []) => {
+    app.container.set('errors', data);
+  });
+
+  app.decorateRequest('entity', (type, data = []) => {
+    app.container.set(type, data);
+  });
+
+  app.decorateReply('errors', () => {
+    const data = app.container.has('errors')
+      ? app.container.get('errors')
+      : [];
+    app.container.set('errors', []);
+    return data;
+  });
+
+  app.decorateReply('entity', (type) => {
+    const data = app.container.has(type)
+      ? app.container.get(type)
+      : [];
+    app.container.delete(type);
+    return data;
+  });
+
+  app.decorateRequest('getTaskData', async (task) => {
+    const author = await app.objection.models.user.query().findById(task.authorId);
+    const performer = await app.objection.models.user.query().findById(task.performerId);
+    const status = await app.objection.models.status.query().findById(task.statusId);
+    const label = [];  //await app.objection.label.query().findById(task.statusId);
+
+    return {
+      id: task.id,
+      name: task.name,
+      author: author.getFullName(),
+      performer: performer ? performer.getFullName() : '',
+      status: status.name,
+      labels: [],
+      description: task.description,
+      createdAt: task.createdAt,
+    };
+  });
 };
 
 const addHooks = (app) => {

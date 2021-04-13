@@ -27,4 +27,27 @@ export default (app) => ({
     const date = new Date(str);
     return date.toLocaleString();
   },
+  getEntityName(entity, type) {
+    switch (type) {
+      case 'performerId':
+        return entity.getFullName();
+      case 'statusId':
+        return entity.name;
+      case 'labelId':
+        return entity.name;
+      default:
+        throw new Error(`Unknown entity type: '${type}'`);
+    }
+  },
+  isSameId({ id }, type, entity) {
+    const { performerId, statusId } = entity;
+    switch (type) {
+      case 'performerId':
+        return id === Number(performerId);
+      case 'statusId':
+        return id === Number(statusId);
+      default:
+        return false;
+    }
+  },
 });

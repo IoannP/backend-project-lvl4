@@ -6,9 +6,9 @@ import objectionUnique from 'objection-unique';
 
 const unique = objectionUnique({ fields: ['name'] });
 
-export default class Status extends unique(Model) {
+export default class Task extends unique(Model) {
   static get tableName() {
-    return 'statuses';
+    return 'tasks';
   }
 
   async $beforeUpdate() {
@@ -18,32 +18,34 @@ export default class Status extends unique(Model) {
   static get jsonSchema() {
     return {
       type: 'object',
-      required: ['name'],
+      required: ['name', 'statusId'],
       properties: {
-        user_id: { type: 'integer' },
         name: { type: 'string', minLength: 1, maxLength: 255 },
-        date_created: { type: 'string' },
-        date_updated: { type: 'string' },
+        authorId: { type: 'integer' },
+        description: { type: 'string' },
+        performerId: { type: 'integer' },
+        statusId: { type: 'integer', minimum: 1 },
+        labelId: { type: 'integer' },
       },
     };
   }
 
   static get relationMappings() {
     return {
-      owner: {
+      author: {
         relation: Model.BelongsToOneRelation,
         modelClass: path.join(__dirname, 'user'),
         join: {
-          from: 'statuses.user_id',
+          from: 'tasks.author_id',
           to: 'users.id',
         },
       },
-      task: {
-        relation: Model.HasManyRelation,
-        modelClass: path.join(__dirname, 'tasx'),
+      performer: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: path.join(__dirname, 'user'),
         join: {
-          from: 'status.id',
-          to: 'task.status_id',
+          from: 'tasks.porformer_id',
+          to: 'users.id',
         },
       },
     };
