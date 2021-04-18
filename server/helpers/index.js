@@ -33,19 +33,26 @@ export default (app) => ({
         return entity.getFullName();
       case 'statusId':
         return entity.name;
-      case 'labelId':
+      case 'labels':
         return entity.name;
       default:
         throw new Error(`Unknown entity type: '${type}'`);
     }
   },
   isSameId({ id }, type, entity) {
-    const { performerId, statusId } = entity;
+    const { performerId, statusId, labels } = entity;
+
     switch (type) {
       case 'performerId':
         return id === Number(performerId);
       case 'statusId':
         return id === Number(statusId);
+      case 'labels': {
+        const labelId = labels
+          ? labels.find((value) => id === Number(value))
+          : undefined;
+        return !_.isUndefined(labelId);
+      }
       default:
         return false;
     }

@@ -6,9 +6,9 @@ import objectionUnique from 'objection-unique';
 
 const unique = objectionUnique({ fields: ['name'] });
 
-export default class Task extends unique(Model) {
+export default class Label extends unique(Model) {
   static get tableName() {
-    return 'tasks';
+    return 'labels';
   }
 
   async $beforeUpdate() {
@@ -18,14 +18,12 @@ export default class Task extends unique(Model) {
   static get jsonSchema() {
     return {
       type: 'object',
-      required: ['name', 'statusId'],
+      required: ['name'],
       properties: {
-        name: { type: 'string', minLength: 1, maxLength: 255 },
         authorId: { type: 'integer' },
-        description: { type: 'string' },
-        performerId: { type: 'integer' },
-        statusId: { type: 'integer', minimum: 1 },
-        labelIds: { type: ['array', 'string'] },
+        name: { type: 'string', minLength: 1, maxLength: 255 },
+        createdAt: { type: 'string' },
+        updatedAt: { type: 'string' },
       },
     };
   }
@@ -36,20 +34,20 @@ export default class Task extends unique(Model) {
         relation: Model.BelongsToOneRelation,
         modelClass: path.join(__dirname, 'user'),
         join: {
-          from: 'tasks.author_id',
+          from: 'statuses.user_id',
           to: 'users.id',
         },
       },
-      labels: {
+      task: {
         relation: Model.ManyToManyRelation,
-        modelClass: path.join(__dirname, 'label'),
+        modelClass: path.join(__dirname, 'task'),
         join: {
-          from: 'tasks.id',
+          from: 'labels.id',
           through: {
-            from: 'task_labels.task_id',
-            to: 'task_labels.label_id',
+            from: 'task_labels.label_id',
+            to: 'task_labels.task_id',
           },
-          to: 'labels.id',
+          to: 'tasks.id',
         },
       },
     };

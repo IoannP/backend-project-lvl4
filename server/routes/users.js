@@ -3,7 +3,7 @@ import i18next from 'i18next';
 export default (app) => app
   .get('/users', { name: 'users' }, async (req, reply) => {
     const users = await app.objection.models.user.query();
-    reply.render('users/users', { users });
+    reply.render('users/list', { users });
     return reply;
   })
   .get('/users/new', { name: 'usersNew' }, async (req, reply) => {
@@ -53,9 +53,14 @@ export default (app) => app
   })
   .delete('/users/:id', async (req, reply) => {
     const { id } = req.params;
-    req.session.delete();
-    await app.objection.models.user.query().deleteById(id);
-    req.flash('info', i18next.t('flash.users.delete.success'));
-    reply.redirect(app.reverse('root'));
+    try {
+      await app.objection.models.user.query().deleteById(id);
+      req.flash('info', i18next.t('flash.users.delete.success'));
+      reply.redirect(app.reverse('root'));
+    } catch (error) {
+      req.flash('error', i18next.t('flash.users.delete.error'));
+      reply.redirect(app.reverse('users'));
+    }
+
     return reply;
   });

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import getApp from '../server/index.js';
-import { getRandomUserData, insertUser } from './helpers.js';
+import { generateUser, insertUser } from './helpers.js';
 
 describe('test users', () => {
   let app;
@@ -12,7 +12,7 @@ describe('test users', () => {
     app = await getApp();
     knex = app.objection.knex;
     models = app.objection.models;
-    testuser = getRandomUserData();
+    testuser = generateUser();
   });
 
   beforeEach(async () => {
@@ -39,7 +39,7 @@ describe('test users', () => {
   });
 
   it('create', async () => {
-    const newUser = getRandomUserData();
+    const newUser = generateUser();
     const response = await app.inject({
       method: 'POST',
       url: app.reverse('users'),

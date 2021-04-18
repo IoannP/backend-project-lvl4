@@ -15,6 +15,10 @@ export default class User extends unique(password(Model)) {
     return `${this.firstname} ${this.lastname}`;
   }
 
+  async $beforeUpdate() {
+    this.updatedAt = new Date().toLocaleString();
+  }
+
   static get jsonSchema() {
     return {
       type: 'object',
@@ -40,7 +44,7 @@ export default class User extends unique(password(Model)) {
           to: 'statuses.user_id',
         },
       },
-      author: {
+      task: {
         relation: Model.HasManyRelation,
         modelClass: path.join(__dirname, 'task'),
         join: {
@@ -48,12 +52,12 @@ export default class User extends unique(password(Model)) {
           to: 'tasks.author_id',
         },
       },
-      performer: {
+      label: {
         relation: Model.HasManyRelation,
-        modelClass: path.join(__dirname, 'task'),
+        modelClass: path.join(__dirname, 'label'),
         join: {
           from: 'users.id',
-          to: 'tasks.performer_id',
+          to: 'labels.author_id',
         },
       },
     };

@@ -10,14 +10,18 @@ module.exports = {
     connection: {
       user: 'ioann',
       password: process.env.DEV_DB_PASSWORD,
-      database: 'manager_test',
+      database: 'manager',
     },
     useNullAsDefault: true,
     migrations,
   },
   test: {
     client: 'pg',
-    connection: ':memory:',
+    connection: {
+      user: 'ioann',
+      password: process.env.DEV_DB_PASSWORD,
+      database: 'test',
+    },
     useNullAsDefault: true,
     migrations,
   },

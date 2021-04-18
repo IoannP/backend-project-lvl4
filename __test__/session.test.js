@@ -1,5 +1,5 @@
 import getApp from '../server/index.js';
-import { getRandomUserData, insertUser } from './helpers.js';
+import { generateUser, insertUser } from './helpers.js';
 
 describe('test sessions', () => {
   let app;
@@ -9,7 +9,7 @@ describe('test sessions', () => {
   beforeAll(async () => {
     app = await getApp();
     knex = app.objection.knex;
-    testuser = getRandomUserData();
+    testuser = generateUser();
   });
 
   beforeEach(async () => {

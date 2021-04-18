@@ -11,5 +11,5 @@ block content
         textarea.form-control(id="data_description" name="data[description]" rows="3")
     +select(task, statuses, 'statusId', t('views.task.edit.status'), errors)
     +select(task, performers, 'performerId', t('views.task.edit.performer'), errors)
-    +select(task, labels, 'labelId', t('views.task.edit.marking'), errors)(multiple="multiple")
+    +select(task, labels, 'labels', t('views.task.edit.marking'), errors)(multiple="multiple")
     +submitPatch()(value=t('views.task.edit.submit'))

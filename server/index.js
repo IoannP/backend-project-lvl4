@@ -14,6 +14,7 @@ import pointOfView from 'point-of-view';
 import Pug from 'pug';
 import i18next from 'i18next';
 import qs from 'qs';
+import _, { values } from 'lodash';
 import ru from './locales/ru.js';
 
 // @ts-ignore
@@ -22,8 +23,9 @@ import webpackConfig from '../webpack.config.babel.js';
 import addRoutes from './routes/index.js';
 import getHelpers from './helpers/index.js';
 import knexConfig from '../knexfile';
-import models from './models';
+import entitiesModels from './models';
 import FormStrategy from './lib/passpot_strategies/form_strategy.js';
+import { date } from 'faker';
 
 const mode = process.env.NODE_ENV || 'development';
 const isProduction = mode === 'production';
@@ -67,7 +69,7 @@ const setupLocalization = () => {
 const addPlugins = (app) => {
   app.register(fastifyObjectionjs, {
     knexConfig: knexConfig[mode],
-    models,
+    models: entitiesModels,
   });
   app.register(fastifyFormbody, { parser: qs.parse });
   app.register(fastifyReverseRoutes);
@@ -123,10 +125,11 @@ const addPlugins = (app) => {
   });
 
   app.decorateRequest('getTaskData', async (task) => {
-    const author = await app.objection.models.user.query().findById(task.authorId);
-    const performer = await app.objection.models.user.query().findById(task.performerId);
-    const status = await app.objection.models.status.query().findById(task.statusId);
-    const label = [];  //await app.objection.label.query().findById(task.statusId);
+    const { models } = app.objection;
+    const author = await models.user.query().findById(task.authorId);
+    const performer = await models.user.query().findById(task.performerId);
+    const status = await models.status.query().findById(task.statusId);
+    const labels = await task.$relatedQuery('labels');
 
     return {
       id: task.id,
@@ -134,10 +137,17 @@ const addPlugins = (app) => {
       author: author.getFullName(),
       performer: performer ? performer.getFullName() : '',
       status: status.name,
-      labels: [],
+      labels: labels.map((label) => label.name),
       description: task.description,
       createdAt: task.createdAt,
     };
+  });
+
+  app.decorateRequest('parse', async (bodydata) => {
+    const data = _.omitBy(bodydata, (value) => _.isEqual(value, ''));
+    if (_.has(data, 'statusId')) _.update(data, 'statusId', _.toNumber);
+    if (_.has(data, 'performerId')) _.update(data, 'performerId', _.toNumber);
+    return data;
   });
 };
 

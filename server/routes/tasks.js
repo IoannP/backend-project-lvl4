@@ -15,7 +15,7 @@ export default (app) => app
     const task = reply.entity('task') || new app.objection.models.task();
     const performers = await models.user.query();
     const statuses = await models.status.query();
-    const labels = [];
+    const labels = await models.label.query();
     const errors = reply.errors();
 
     reply.render('tasks/new', {
@@ -31,15 +31,23 @@ export default (app) => app
     try {
       const { id } = req.user;
       const { models } = app.objection;
-      const data = _.omitBy(req.body.data, (value) => value.length === 0);
-
-      if (_.has(data, 'statusId')) _.update(data, 'statusId', _.toNumber);
-      if (_.has(data, 'performerId')) _.update(data, 'performerId', _.toNumber);
+      const { knex } = app.objection;
+      const data = await req.parse(req.body.data);
 
       const task = await models.task.fromJson(data);
+
+      const { labels } = task;
+
+      delete task.labels;
       const user = await models.user.query().findById(id);
 
-      await user.$relatedQuery('author').insert(task);
+      await knex.transaction(async (trx) => {
+        const ts = await user.$relatedQuery('task', trx).insert(task);
+        if (labels) {
+          const lbs = [...labels].map((value) => ({ label_id: value, task_id: ts.id }));
+          await knex('task_labels').insert(lbs);
+        }
+      });
 
       req.flash('info', i18next.t('flash.tasks.create.success'));
       reply.redirect(app.reverse('tasks'));
@@ -63,10 +71,12 @@ export default (app) => app
   .get('/tasks/:id/edit', async (req, reply) => {
     const { id } = req.params;
     const { models } = app.objection;
-    const task = await models.task.query().findById(id);
+    const task = await models.task.query().findById(id).withGraphFetched('labels');
+    _.update(task, 'labels', (labels) => labels.map((label) => label.id));
+
     const performers = await models.user.query();
     const statuses = await models.status.query();
-    const labels = [];
+    const labels = await models.label.query();
     const errors = reply.errors();
 
     reply.render('tasks/edit', {
@@ -82,20 +92,30 @@ export default (app) => app
     const { id } = req.params;
     try {
       const { models } = app.objection;
-      const patchForm = _.omitBy(req.body.data, (value) => value.length === 0);
+      const { knex } = app.objection;
+      const patchForm = await req.parse(req.body.data);
 
-      if (_.has(patchForm, 'statusId')) _.update(patchForm, 'statusId', _.toNumber);
-      if (_.has(patchForm, 'performerId')) _.update(patchForm, 'performerId', _.toNumber);
+      const { labels } = patchForm;
+      delete patchForm.labels;
 
       const task = await models.task.query().findById(id);
 
-      await task.$query().update(patchForm);
+      await knex.transaction(async (trx) => {
+        await task.$query(trx).update(patchForm);
+        await knex('task_labels').delete().where('task_id', task.id);
+
+        if (labels) {
+          const lbs = [...labels].map((value) => ({ label_id: value, task_id: task.id }));
+          await knex('task_labels').insert(lbs);
+        }
+      });
 
       req.flash('info', i18next.t('flash.tasks.edit.success'));
       reply.redirect(app.reverse('tasks'));
 
       return reply;
     } catch (error) {
+      console.log(error);
       req.flash('error', i18next.t('flash.tasks.edit.error'));
       req.errors(error.data);
       req.entity('task', req.body.data);
@@ -105,8 +125,16 @@ export default (app) => app
   })
   .delete('/tasks/:id', async (req, reply) => {
     const { id } = req.params;
-    await app.objection.models.task.query().deleteById(id);
-    req.flash('info', i18next.t('flash.tasks.delete.success'));
+    const { models } = app.objection;
+    const { authorId } = models.task.query().findById(id);
+
+    if (id !== authorId) {
+      req.flash('error', i18next.t('flash.tasks.delete.error'));
+    } else {
+      await app.objection.models.task.query().deleteById(id);
+      req.flash('info', i18next.t('flash.tasks.delete.success'));
+    }
+
     reply.redirect(app.reverse('tasks'));
     return reply;
   });

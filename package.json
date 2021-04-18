@@ -4,7 +4,7 @@
    "description": "Task manager",
    "main": "server/index.js",
    "scripts": {
-      "test": "jest",
+      "test": "jest --runInBand",
       "prebuild": "rm -rf dist",
       "build-db": "cp knexfile.js dist",
       "build-configs": "babel webpack.config.babel.js --out-dir dist",

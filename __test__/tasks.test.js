@@ -2,23 +2,34 @@ import getApp from '../server/index.js';
 import {
   generateUser,
   generateStatus,
+  generateTask,
+  generateLabels,
   insertUser,
   insertStatus,
+  insertTask,
+  insertLabels,
 } from './helpers.js';
 
-describe('test statuses', () => {
+describe('test tasks', () => {
   let app;
   let knex;
   let models;
+  let testuserData;
+  let teststatusData;
+  let testtaskData;
   let testuser;
   let teststatus;
+  let testtask;
+  let testlabels;
 
   beforeAll(async () => {
     app = await getApp();
     knex = app.objection.knex;
     models = app.objection.models;
-    testuser = generateUser();
-    teststatus = generateStatus();
+    testuserData = generateUser();
+    teststatusData = generateStatus();
+    testtaskData = generateTask();
+    testlabelsData = generateLabels();
 
     app.addHook('preHandler', (req, reply, done) => {
       req.user = { id: 1 };
@@ -28,14 +39,18 @@ describe('test statuses', () => {
 
   beforeEach(async () => {
     await knex.migrate.latest();
-    const user = await insertUser(app, testuser);
-    await insertStatus(user, teststatus);
+    testuser = await insertUser(app, testuserData);
+    teststatus = await insertStatus(testuser, teststatusData);
+    testlabels = await insertLabels(testtask, testlabelsData);
+    testtaskData.statusId = teststatus.id;
+    testtaskData.labelIds = 
+    testtask = await insertTask(testuser, testtaskData);
   });
 
-  it('statuses', async () => {
+  it('tasks', async () => {
     const { statusCode } = await app.inject({
       method: 'GET',
-      url: app.reverse('statuses'),
+      url: app.reverse('tasks'),
     });
 
     expect(statusCode).toBe(200);
@@ -44,37 +59,37 @@ describe('test statuses', () => {
   it('new', async () => {
     const { statusCode } = await app.inject({
       method: 'GET',
-      url: app.reverse('newStatus'),
+      url: app.reverse('newTask'),
     });
 
     expect(statusCode).toBe(200);
   });
 
   it('create', async () => {
-    const newStatus = generateStatus();
+    const newTask = generateTask();
+    newTask.statusId = teststatus.id;
+
     const { statusCode } = await app.inject({
       method: 'POST',
-      url: app.reverse('statuses'),
+      url: app.reverse('tasks'),
       payload: {
-        data: newStatus,
+        data: newTask,
       },
     });
 
     expect(statusCode).toBe(302);
 
-    const status = await models.status.query().findOne({ name: newStatus.name });
+    const task = await models.task.query().findOne({ name: newTask.name });
 
-    expect(status).toMatchObject(newStatus);
+    expect(task).toMatchObject(newTask);
   });
 
   it('update', async () => {
-    const status = await models.status.query().findOne({ name: teststatus.name });
-    const updateForm = { name: 'newStatusName' };
+    const updateForm = { name: 'newTaskName', statusId: teststatus.id };
 
-    await status.$query().patch(updateForm);
     const { statusCode } = await app.inject({
       method: 'PATCH',
-      url: `/statuses/${status.id}`,
+      url: `/tasks/${testtask.id}`,
       payload: {
         data: updateForm,
       },
@@ -82,13 +97,13 @@ describe('test statuses', () => {
 
     expect(statusCode).toBe(302);
 
-    const updatedUser = await models.status.query().findOne({ name: updateForm.name });
-    expect(updatedUser).toMatchObject(updateForm);
+    const updatedTask = await models.task.query().findOne({ name: updateForm.name });
+    expect(updatedTask).toMatchObject(updateForm);
   });
 
   it('delete', async () => {
-    const { id } = await models.status.query().findOne({ name: teststatus.name });
-    await app.objection.models.status.query().deleteById(id);
+    const { id } = testtask;
+    await models.task.query().deleteById(id);
     const { statusCode } = await app.inject({
       method: 'DELETE',
       url: `/statuses/${id}`,
