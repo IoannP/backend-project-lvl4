@@ -7,9 +7,7 @@ export default (app) => app
   .get('/tasks', { name: 'tasks' }, async (req, reply) => {
     const { models } = app.objection;
     const { id } = req.user;
-    console.log('----------------------------------------------------------------------------------------------------------------');
 
-    console.log(reply.request.query);
     const performers = await models.user.query();
     const statuses = await models.status.query();
     const lbs = await models.label.query();

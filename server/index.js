@@ -13,7 +13,7 @@ import fastifyStatic from 'fastify-static';
 import pointOfView from 'point-of-view';
 import Pug from 'pug';
 import i18next from 'i18next';
-import rollabar from 'rollbar';
+import Rollbar from 'rollbar';
 import qs from 'qs';
 import _ from 'lodash';
 import ru from './locales/ru.js';
@@ -26,7 +26,6 @@ import getHelpers from './helpers/index.js';
 import knexConfig from '../knexfile';
 import entitiesModels from './models';
 import FormStrategy from './lib/passpot_strategies/form_strategy.js';
-import Rollbar from 'rollbar';
 
 const mode = process.env.NODE_ENV || 'development';
 const isProduction = mode === 'production';
@@ -68,17 +67,13 @@ const setupLocalization = () => {
 };
 
 const addPlugins = (app) => {
-  const rollbar = new Rollbar({
-    accessToken: process.env.RALLBAR_ACCESS_TOKEN,
-  });
-  app.register(rollabar.errorHandler())
   app.register(fastifyObjectionjs, {
     knexConfig: knexConfig[mode],
     models: entitiesModels,
   });
   app.register(fastifyFormbody, { parser: qs.parse });
   app.register(fastifyReverseRoutes);
-  app.register(fastifyErrorPage);
+  if (isDevelopment) app.register(fastifyErrorPage);
   app.register(fastifySession, {
     secret: process.env.SESSION_KEY,
     cookie: {
@@ -164,6 +159,19 @@ const addHooks = (app) => {
   });
 };
 
+const setErrorHandler = (app) => {
+  const rollbar = new Rollbar({
+    accessToken: process.env.ROLLBAR_ACCESS_TOKEN,
+    captureUncaught: true,
+    captureUnhandledRejections: true,
+  });
+
+  app.setErrorHandler((err, req, reply) => {
+    app.log.debug(err);
+    rollbar.errorHander()(err, req, reply, (error) => reply.send(error));
+  });
+};
+
 const setupStaticAssets = (app) => {
   const pathPublic = isProduction
     ? path.join(__dirname, '..', 'public')
@@ -187,6 +195,7 @@ export default () => {
   addPlugins(app);
   addRoutes(app);
   addHooks(app);
+  if (isProduction) setErrorHandler(app);
 
   return app;
 };
