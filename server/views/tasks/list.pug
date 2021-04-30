@@ -2,6 +2,7 @@ extends ../layouts/application.pug
 
 block content
   a(href=route('newTask'))= t('views.task.list.create')
+  include ./filter.pug
   table.table.table-hover
     thead
       tr

@@ -59,6 +59,7 @@
       "point-of-view": "^4.14.0",
       "pug": "^3.0.2",
       "qs": "^6.10.0",
+      "rollbar": "^2.21.1",
       "webpack": "^5.27.0"
    },
    "devDependencies": {

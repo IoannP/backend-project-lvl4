@@ -49,8 +49,9 @@ export default (app) => ({
         return id === Number(statusId);
       case 'labels': {
         const labelId = labels
-          ? labels.find((value) => id === Number(value))
+          ? [...labels].find((value) => id === Number(value))
           : undefined;
+
         return !_.isUndefined(labelId);
       }
       default:

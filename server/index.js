@@ -1,4 +1,4 @@
-// @ts-check
+// @ts-nocheck
 
 import path from 'path';
 import fastify from 'fastify';
@@ -13,8 +13,9 @@ import fastifyStatic from 'fastify-static';
 import pointOfView from 'point-of-view';
 import Pug from 'pug';
 import i18next from 'i18next';
+import rollabar from 'rollbar';
 import qs from 'qs';
-import _, { values } from 'lodash';
+import _ from 'lodash';
 import ru from './locales/ru.js';
 
 // @ts-ignore
@@ -25,7 +26,7 @@ import getHelpers from './helpers/index.js';
 import knexConfig from '../knexfile';
 import entitiesModels from './models';
 import FormStrategy from './lib/passpot_strategies/form_strategy.js';
-import { date } from 'faker';
+import Rollbar from 'rollbar';
 
 const mode = process.env.NODE_ENV || 'development';
 const isProduction = mode === 'production';
@@ -67,6 +68,10 @@ const setupLocalization = () => {
 };
 
 const addPlugins = (app) => {
+  const rollbar = new Rollbar({
+    accessToken: process.env.RALLBAR_ACCESS_TOKEN,
+  });
+  app.register(rollabar.errorHandler())
   app.register(fastifyObjectionjs, {
     knexConfig: knexConfig[mode],
     models: entitiesModels,
@@ -142,13 +147,6 @@ const addPlugins = (app) => {
       createdAt: task.createdAt,
     };
   });
-
-  app.decorateRequest('parse', async (bodydata) => {
-    const data = _.omitBy(bodydata, (value) => _.isEqual(value, ''));
-    if (_.has(data, 'statusId')) _.update(data, 'statusId', _.toNumber);
-    if (_.has(data, 'performerId')) _.update(data, 'performerId', _.toNumber);
-    return data;
-  });
 };
 
 const addHooks = (app) => {
@@ -156,6 +154,13 @@ const addHooks = (app) => {
     reply.locals = {
       isAuthenticated: () => req.isAuthenticated(),
     };
+  });
+
+  app.addHook('preHandler', async (req, _reply) => {
+    const { body } = req;
+    if (body) {
+      body.data = _.omitBy(body.data, (value) => _.isEqual(value, ''));
+    }
   });
 };
 

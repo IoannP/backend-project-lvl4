@@ -45,6 +45,24 @@ mixin select(entity, entityList, propertyName, label, errors = {})
     if !_.isEmpty(propertyErrors)
       .invalid-feedback= propertyErrors.map(({ message }) => message).join('. ')
   
+mixin selectList(entity, entityList, propertyName, label)
+  - inputId = getInputId(propertyName)
+  .form-group
+    label(
+      for= inputId
+    )= label
+    select(
+      id=inputId
+      name=propertyName
+      class="form-control"
+    )&attributes(attributes)
+      option
+      each value in entityList
+        if isSameId(value, propertyName, entity)
+          option(value=value.id selected)= getEntityName(value, propertyName)
+        else
+          option(value=value.id)= getEntityName(value, propertyName)
+
 mixin submit(form = null)
   .form-group
     input(class='btn btn-primary' type='submit')&attributes(attributes)

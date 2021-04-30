@@ -39,10 +39,17 @@ exports.up = (knex) => knex.schema.createTable('users', (table) => {
     table.timestamp('updated_at');
     table.unique('name');
     table.foreign('author_id').references('id').inTable('users');
+  })
+  .createTable('task_labels', (table) => {
+    table.integer('task_id');
+    table.integer('label_id');
+    table.foreign('task_id').references('id').inTable('tasks');
+    table.foreign('label_id').references('id').inTable('labels');
   });
 
 exports.down = (knex) => knex
   .schema
+  .dropTable('task_labels')
   .dropTable('labels')
   .dropTable('tasks')
   .dropTable('statuses')

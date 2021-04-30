@@ -92,6 +92,13 @@ module.exports = {
           dateCreated: 'Дата создания',
           edit: 'Изменить',
           delete: 'Удалить',
+          filter:{
+            status: 'Статус',
+            performer: 'Исполнитель',
+            label: 'Метка',
+            checkbox: 'Только мои задачи',
+            submit: 'Показать',
+          },
         },
         edit: {
           edit: 'Изменение задачи',

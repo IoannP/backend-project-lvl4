@@ -53,6 +53,7 @@ export default (app) => app
   })
   .delete('/users/:id', async (req, reply) => {
     const { id } = req.params;
+
     try {
       await app.objection.models.user.query().deleteById(id);
       req.flash('info', i18next.t('flash.users.delete.success'));

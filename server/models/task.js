@@ -1,7 +1,7 @@
 // @ts-check
 
 import path from 'path';
-import { Model } from 'objection';
+import { Model, AjvValidator } from 'objection';
 import objectionUnique from 'objection-unique';
 
 const unique = objectionUnique({ fields: ['name'] });
@@ -9,6 +9,18 @@ const unique = objectionUnique({ fields: ['name'] });
 export default class Task extends unique(Model) {
   static get tableName() {
     return 'tasks';
+  }
+
+  static createValidator() {
+    return new AjvValidator({
+      onCreateAjv: (avj) => avj,
+      options: {
+        allErrors: true,
+        validateSchema: true,
+        ownProperties: true,
+        coerceTypes: 'array',
+      },
+    });
   }
 
   async $beforeUpdate() {
@@ -24,8 +36,8 @@ export default class Task extends unique(Model) {
         authorId: { type: 'integer' },
         description: { type: 'string' },
         performerId: { type: 'integer' },
-        statusId: { type: 'integer', minimum: 1 },
-        labelIds: { type: ['array', 'string'] },
+        statusId: { type: 'integer', minimum: 1, default: null },
+        labels: { type: 'array', default: [] },
       },
     };
   }
@@ -50,6 +62,14 @@ export default class Task extends unique(Model) {
             to: 'task_labels.label_id',
           },
           to: 'labels.id',
+        },
+      },
+      performer: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: path.join(__dirname, 'user'),
+        join: {
+          from: 'tasks.performer_id',
+          to: 'users.id',
         },
       },
     };

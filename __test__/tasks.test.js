@@ -3,11 +3,11 @@ import {
   generateUser,
   generateStatus,
   generateTask,
-  generateLabels,
+  generateLabel,
   insertUser,
   insertStatus,
   insertTask,
-  insertLabels,
+  insertLabel,
 } from './helpers.js';
 
 describe('test tasks', () => {
@@ -17,6 +17,7 @@ describe('test tasks', () => {
   let testuserData;
   let teststatusData;
   let testtaskData;
+  let testlabelsData;
   let testuser;
   let teststatus;
   let testtask;
@@ -29,7 +30,7 @@ describe('test tasks', () => {
     testuserData = generateUser();
     teststatusData = generateStatus();
     testtaskData = generateTask();
-    testlabelsData = generateLabels();
+    testlabelsData = [generateLabel(), generateLabel()];
 
     app.addHook('preHandler', (req, reply, done) => {
       req.user = { id: 1 };
@@ -41,10 +42,9 @@ describe('test tasks', () => {
     await knex.migrate.latest();
     testuser = await insertUser(app, testuserData);
     teststatus = await insertStatus(testuser, teststatusData);
-    testlabels = await insertLabels(testtask, testlabelsData);
     testtaskData.statusId = teststatus.id;
-    testtaskData.labelIds = 
     testtask = await insertTask(testuser, testtaskData);
+    testlabels = await insertLabel(testuser, testlabelsData);
   });
 
   it('tasks', async () => {
@@ -68,6 +68,7 @@ describe('test tasks', () => {
   it('create', async () => {
     const newTask = generateTask();
     newTask.statusId = teststatus.id;
+    newTask.labels = testlabels.map((label) => label.id);
 
     const { statusCode } = await app.inject({
       method: 'POST',
@@ -79,26 +80,39 @@ describe('test tasks', () => {
 
     expect(statusCode).toBe(302);
 
-    const task = await models.task.query().findOne({ name: newTask.name });
+    const task = await models.task.query().findOne({ name: newTask.name }).withGraphFetched('labels');
+    const labels = await models.label.query().whereIn('id', task.labels.map((label) => label.id));
+    delete newTask.labels;
 
+    expect(task.labels).toMatchObject(labels);
     expect(task).toMatchObject(newTask);
   });
 
   it('update', async () => {
-    const updateForm = { name: 'newTaskName', statusId: teststatus.id };
+    const [label] = testlabels;
+    const form = {
+      name: 'newTaskName',
+      statusId: teststatus.id,
+      labels: label.id,
+    };
 
     const { statusCode } = await app.inject({
       method: 'PATCH',
       url: `/tasks/${testtask.id}`,
       payload: {
-        data: updateForm,
+        data: form,
       },
     });
 
     expect(statusCode).toBe(302);
 
-    const updatedTask = await models.task.query().findOne({ name: updateForm.name });
-    expect(updatedTask).toMatchObject(updateForm);
+    const task = await models.task.query().findOne({ name: form.name }).withGraphFetched('labels');
+    const tasklabel = await models.label.query().whereIn('id', task.labels.map((lb) => lb.id));
+
+    expect(task.labels).toMatchObject(tasklabel);
+    delete form.labels;
+
+    expect(task).toMatchObject(form);
   });
 
   it('delete', async () => {

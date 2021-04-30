@@ -1,13 +1,47 @@
+// ts-check
+
 import i18next from 'i18next';
 import _ from 'lodash';
 
 export default (app) => app
   .get('/tasks', { name: 'tasks' }, async (req, reply) => {
-    const tks = await app.objection.models.task.query();
-    const formatedTasks = tks.map(req.getTaskData);
+    const { models } = app.objection;
+    const { id } = req.user;
+    console.log('----------------------------------------------------------------------------------------------------------------');
+
+    console.log(reply.request.query);
+    const performers = await models.user.query();
+    const statuses = await models.status.query();
+    const lbs = await models.label.query();
+    const task = reply.request.query || new models.task();
+
+    const {
+      performerId,
+      statusId,
+      labels,
+      isCreatorUser,
+    } = task;
+    let tsks = models.task.query();
+    if (performerId) tsks = tsks.where('performerId', performerId);
+    if (statusId) tsks = tsks.where('statusId', statusId);
+    if (labels) {
+      tsks = tsks.whereExists(function () {
+        this.select('*').from('task_labels').whereRaw('label_id = ?', labels).whereRaw('task_labels.task_id = tasks.id');
+      });
+    }
+    if (isCreatorUser) tsks = tsks.where('authorId', id);
+    tsks = await tsks;
+
+    const formatedTasks = tsks.map(req.getTaskData);
     const tasks = await Promise.all(formatedTasks);
 
-    reply.render('tasks/list', { tasks });
+    reply.render('tasks/list', {
+      task,
+      tasks,
+      performers,
+      statuses,
+      labels: lbs,
+    });
     return reply;
   })
   .get('/tasks/new', { name: 'newTask' }, async (req, reply) => {
@@ -32,21 +66,15 @@ export default (app) => app
       const { id } = req.user;
       const { models } = app.objection;
       const { knex } = app.objection;
-      const data = await req.parse(req.body.data);
 
-      const task = await models.task.fromJson(data);
-
-      const { labels } = task;
-
-      delete task.labels;
+      const task = await models.task.fromJson(req.body.data);
       const user = await models.user.query().findById(id);
 
+      const labels = task.labels.map((value) => ({ id: value }));
+      task.labels = labels;
+
       await knex.transaction(async (trx) => {
-        const ts = await user.$relatedQuery('task', trx).insert(task);
-        if (labels) {
-          const lbs = [...labels].map((value) => ({ label_id: value, task_id: ts.id }));
-          await knex('task_labels').insert(lbs);
-        }
+        await user.$relatedQuery('task', trx).insertGraph(task, { relate: ['labels'] });
       });
 
       req.flash('info', i18next.t('flash.tasks.create.success'));
@@ -93,21 +121,21 @@ export default (app) => app
     try {
       const { models } = app.objection;
       const { knex } = app.objection;
-      const patchForm = await req.parse(req.body.data);
-
-      const { labels } = patchForm;
-      delete patchForm.labels;
 
       const task = await models.task.query().findById(id);
+      const { data } = req.body;
+
+      let { labels } = data;
+      labels = labels ? [labels].map((value) => ({ id: value })) : [];
+      data.labels = labels;
+      data.id = task.id;
 
       await knex.transaction(async (trx) => {
-        await task.$query(trx).update(patchForm);
-        await knex('task_labels').delete().where('task_id', task.id);
-
-        if (labels) {
-          const lbs = [...labels].map((value) => ({ label_id: value, task_id: task.id }));
-          await knex('task_labels').insert(lbs);
-        }
+        await models.task.query(trx).upsertGraph(data, {
+          relate: true,
+          update: true,
+          unrelate: true,
+        });
       });
 
       req.flash('info', i18next.t('flash.tasks.edit.success'));
@@ -126,9 +154,9 @@ export default (app) => app
   .delete('/tasks/:id', async (req, reply) => {
     const { id } = req.params;
     const { models } = app.objection;
-    const { authorId } = models.task.query().findById(id);
+    const { authorId } = await models.task.query().findById(id);
 
-    if (id !== authorId) {
+    if (req.user.id !== authorId) {
       req.flash('error', i18next.t('flash.tasks.delete.error'));
     } else {
       await app.objection.models.task.query().deleteById(id);
