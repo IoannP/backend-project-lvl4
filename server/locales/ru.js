@@ -16,6 +16,8 @@ module.exports = {
       session: {
         new: {
           signIn: 'Вход',
+          email: 'Email',
+          password: 'Пароль',
           submit: 'Войти',
         },
       },
