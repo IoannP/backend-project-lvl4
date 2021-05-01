@@ -14,9 +14,9 @@ describe('test users', () => {
     knex = app.objection.knex;
     models = app.objection.models;
     testuser = generateUser();
-    app.addHook('preHandler', (req, reply, done) => {
-      req.user = { id: 1 };
-      done();
+    app.addHook('preHandler', async (req, reply) => {
+      const user = await models.user.query().findOne({ email: testuser.email });
+      req.user = user;
     });
   });
 

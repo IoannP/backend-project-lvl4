@@ -19,6 +19,7 @@ export default class Task extends unique(Model) {
         validateSchema: true,
         ownProperties: true,
         coerceTypes: 'array',
+        nullable: true,
       },
     });
   }
