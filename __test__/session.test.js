@@ -25,7 +25,7 @@ describe('test sessions', () => {
 
     expect(response.statusCode).toBe(200);
     const { email, password } = testuser;
-    const responseSignIn = await app.inject({
+    const { statusCode, cookies } = await app.inject({
       method: 'POST',
       url: app.reverse('session'),
       payload: {
@@ -33,9 +33,9 @@ describe('test sessions', () => {
       },
     });
 
-    expect(responseSignIn.statusCode).toBe(302);
+    expect(statusCode).toBe(302);
 
-    const [sessionCookie] = responseSignIn.cookies;
+    const [sessionCookie] = cookies;
     const { name, value } = sessionCookie;
     const cookie = { [name]: value };
 

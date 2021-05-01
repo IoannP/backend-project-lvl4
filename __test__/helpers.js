@@ -16,22 +16,10 @@ export const generateTask = () => ({
 
 export const generateLabel = () => ({ name: faker.random.word() });
 
-export const insertUser = async (app, form) => {
-  const user = await app.objection.models.user.query().insert(form);
-  return user;
-};
+export const insertUser = (app, form) => app.objection.models.user.query().insert(form);
 
-export const insertStatus = async (user, form) => {
-  const status = await user.$relatedQuery('status').insert(form);
-  return status;
-};
+export const insertStatus = (user, form) => user.$relatedQuery('status').insert(form);
 
-export const insertTask = async (user, form) => {
-  const task = await user.$relatedQuery('task').insert(form);
-  return task;
-};
+export const insertTask = (user, form) => user.$relatedQuery('task').insert(form);
 
-export const insertLabel = async (user, form) => {
-  const label = await user.$relatedQuery('label').insert(form);
-  return label;
-};
+export const insertLabel = (user, form) => user.$relatedQuery('label').insert(form);

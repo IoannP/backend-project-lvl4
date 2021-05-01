@@ -26,15 +26,13 @@ module.exports = {
           more: 'Узнать Больше',
         },
       },
-      form: {
-        firstname: 'Имя',
-        lastname: 'Фамилия',
-        email: 'Email',
-        password: 'Пароль',
-      },
       users: {
         new: {
           signUp: 'Регистрация',
+          firstname: 'Имя',
+          lastname: 'Фамилия',
+          email: 'Email',
+          password: 'Пароль',
           submit: 'Сохранить',
         },
         list: {
@@ -48,6 +46,10 @@ module.exports = {
         },
         edit: {
           edit: 'Изменение пользователя',
+          firstname: 'Имя',
+          lastname: 'Фамилия',
+          email: 'Email',
+          password: 'Пароль',
           submit: 'Изменить',
         },
       },
@@ -157,10 +159,12 @@ module.exports = {
         },
         edit: {
           error: 'Не удалось изменить пользователя',
+          autherror: 'Вы не можете редактировать или удалять другого пользователя',
           success: 'Пользователь успешно изменён',
         },
         delete: {
-          error: 'Не удалось изменить удалить пользователя',
+          error: 'Не удалось удалить пользователя',
+          autherror: 'Вы не можете редактировать или удалять другого пользователя',
           success: 'Пользователь успешно удалён',
         },
       },

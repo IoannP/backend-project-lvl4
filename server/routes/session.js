@@ -8,6 +8,7 @@ export default (app) => app
     if (err) {
       return app.httpErrors.internalServerError(err);
     }
+
     if (!user) {
       const signInForm = req.body.data;
       const errors = {

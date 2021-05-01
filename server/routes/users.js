@@ -14,14 +14,12 @@ export default (app) => app
   .post('/users', async (req, reply) => {
     try {
       const user = await app.objection.models.user.fromJson(req.body.data);
-
       await app.objection.models.user.query().insert(user);
 
       req.flash('info', i18next.t('flash.users.create.success'));
       reply.redirect(app.reverse('root'));
       return reply;
     } catch (error) {
-      console.log(error);
       req.flash('error', i18next.t('flash.users.create.error'));
       reply.render('users/new', { user: req.body.data, errors: error.data });
       return reply;
@@ -29,8 +27,22 @@ export default (app) => app
   })
   .get('/users/:id/edit', async (req, reply) => {
     const { id } = req.params;
-    const user = await app.objection.models.user.query().findById(id);
-    reply.render('users/edit', { user });
+    const { user } = req;
+
+    if (!req.isAuthenticated()) {
+      req.flash('error', i18next.t('flash.authError'));
+      reply.redirect(app.reverse('root'));
+      return reply;
+    }
+
+    if (user.id !== Number(id)) {
+      req.flash('error', i18next.t('flash.users.delete.autherror'));
+      reply.redirect(app.reverse('users'));
+      return reply;
+    }
+
+    const usr = await app.objection.models.user.query().findById(id);
+    reply.render('users/edit', { user: usr });
     return reply;
   })
   .patch('/users/:id', async (req, reply) => {
@@ -53,6 +65,19 @@ export default (app) => app
   })
   .delete('/users/:id', async (req, reply) => {
     const { id } = req.params;
+    const { user } = req;
+
+    if (!req.isAuthenticated()) {
+      req.flash('error', i18next.t('flash.authError'));
+      reply.redirect(app.reverse('root'));
+      return reply;
+    }
+
+    if (user.id !== Number(id)) {
+      req.flash('error', i18next.t('flash.users.delete.autherror'));
+      reply.redirect(app.reverse('users'));
+      return reply;
+    }
 
     try {
       await app.objection.models.user.query().deleteById(id);
