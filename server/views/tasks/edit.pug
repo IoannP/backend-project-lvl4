@@ -1,15 +1,15 @@
 extends ../layouts/application.pug
 
 block header
-  = t('views.task.edit.edit')
+  = t('views.tasks.edit.edit')
 
 block content
   +formFor()(action=`/tasks/${task.id}` method='post')
-    +input(task, 'name', t('views.task.edit.name'), errors)(type="text")
+    +input(task, 'name', t('views.tasks.edit.name'), errors)(type="text")
     .form-group
-        label(for="data_description")= t('views.task.edit.description')
+        label(for="data_description")= t('views.tasks.edit.description')
         textarea.form-control(id="data_description" name="data[description]" rows="3")
-    +select(task, statuses, 'statusId', t('views.task.edit.status'), errors)
-    +select(task, performers, 'performerId', t('views.task.edit.performer'), errors)
-    +select(task, labels, 'labels', t('views.task.edit.marking'), errors)(multiple="multiple")
-    +submitPatch()(value=t('views.task.edit.submit'))
+    +select(task, statuses, 'statusId', t('views.tasks.edit.status'), errors)
+    +select(task, performers, 'performerId', t('views.tasks.edit.performer'), errors)
+    +select(task, labels, 'labels', t('views.tasks.edit.marking'), errors)(multiple="multiple")
+    +submitPatch()(value=t('views.tasks.edit.submit'))

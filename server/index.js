@@ -151,7 +151,7 @@ const addHooks = (app) => {
     };
   });
 
-  app.addHook('preHandler', async (req, _reply) => {
+  app.addHook('preHandler', async (req) => {
     const { body } = req;
     if (body) {
       body.data = _.omitBy(body.data, (value) => _.isEqual(value, ''));

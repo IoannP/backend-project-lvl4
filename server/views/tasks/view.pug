@@ -9,24 +9,24 @@ block content
       hr
       .container
         .row.p-1
-          .col= t('views.task.view.author')
+          .col= t('views.tasks.view.author')
           .col= task.author
         .row.p-1
-          .col= t('views.task.view.performer')
+          .col= t('views.tasks.view.performer')
           .col= task.performer
         .row.p-1
-          .col= t('views.task.view.status')
+          .col= t('views.tasks.view.status')
           .col= task.status
         .row.p-1
-          .col= t('views.task.view.createdAt')
+          .col= t('views.tasks.view.createdAt')
           .col= task.createdAt
         .row.p-1
           .col
-            h6= t('views.task.view.labels')
+            h6= t('views.tasks.view.labels')
             ul
               each label in task.labels
                 li= label
         .row.p-1
           .col
-            a(href=`/tasks/${task.id}/edit`)= t('views.task.view.edit')
-            +buttonTo(`/tasks/${task.id}`, 'delete')(value=t('views.task.list.delete') class="btn btn-link")
+            a(href=`/tasks/${task.id}/edit`)= t('views.tasks.view.edit')
+            +buttonTo(`/tasks/${task.id}`, 'delete')(value=t('views.tasks.list.delete') class="btn btn-link")

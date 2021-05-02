@@ -1,11 +1,10 @@
-// ts-check
-
 import i18next from 'i18next';
 import _ from 'lodash';
 
 export default (app) => app
   .get('/tasks', { name: 'tasks' }, async (req, reply) => {
     const { models } = app.objection;
+    const { knex } = app.objection;
     const { id } = req.user;
 
     const performers = await models.user.query();
@@ -23,12 +22,10 @@ export default (app) => app
     if (performerId) tsks = tsks.where('performerId', performerId);
     if (statusId) tsks = tsks.where('statusId', statusId);
     if (labels) {
-      tsks = tsks.whereExists(function () {
-        this.select('*').from('task_labels').whereRaw('label_id = ?', labels).whereRaw('task_labels.task_id = tasks.id');
-      });
+      tsks = tsks.whereExists(knex('task_labels').whereRaw('label_id = ?', labels).whereRaw('task_labels.task_id = tasks.id'));
     }
     if (isCreatorUser) tsks = tsks.where('authorId', id);
-    tsks = await tsks;
+    tsks = await tsks.orderBy('id');
 
     const formatedTasks = tsks.map(req.getTaskData);
     const tasks = await Promise.all(formatedTasks);
@@ -120,15 +117,12 @@ export default (app) => app
       const { knex } = app.objection;
 
       const task = await models.task.query().findById(id);
-      const { data } = req.body;
-
-      let { labels } = data;
-      labels = labels ? [labels].map((value) => ({ id: value })) : [];
-      data.labels = labels;
-      data.id = task.id;
+      const updateData = await models.task.fromJson(req.body.data);
+      updateData.labels = updateData.labels.map((value) => ({ id: value }));
+      updateData.id = task.id;
 
       await knex.transaction(async (trx) => {
-        await models.task.query(trx).upsertGraph(data, {
+        await models.task.query(trx).upsertGraph(updateData, {
           relate: true,
           update: true,
           unrelate: true,
@@ -140,7 +134,6 @@ export default (app) => app
 
       return reply;
     } catch (error) {
-      console.log(error);
       req.flash('error', i18next.t('flash.tasks.edit.error'));
       req.errors(error.data);
       req.entity('task', req.body.data);
@@ -151,12 +144,16 @@ export default (app) => app
   .delete('/tasks/:id', async (req, reply) => {
     const { id } = req.params;
     const { models } = app.objection;
-    const { authorId } = await models.task.query().findById(id);
+    const { authorId, labels } = await models.task.query().findById(id).withGraphFetched('labels');
 
+    if (labels.length > 0) {
+      req.flash('error', i18next.t('flash.tasks.delete.error.dependency'));
+    }
     if (req.user.id !== authorId) {
-      req.flash('error', i18next.t('flash.tasks.delete.error'));
-    } else {
-      await app.objection.models.task.query().deleteById(id);
+      req.flash('error', i18next.t('flash.tasks.delete.error.authError'));
+    }
+    if (req.user.id === authorId && labels.length === 0) {
+      await models.task.query().deleteById(id);
       req.flash('info', i18next.t('flash.tasks.delete.success'));
     }
 

@@ -1,3 +1,4 @@
+import { describe, test } from '@jest/globals';
 import getApp from '../server/index.js';
 import {
   generateUser,
@@ -20,9 +21,9 @@ describe('test labels', () => {
     testuser = generateUser();
     testlabel = generateLabel();
 
-    app.addHook('preHandler', (req, reply, done) => {
-      req.user = { id: 1 };
-      done();
+    app.addHook('preHandler', async (req) => {
+      const user = await models.user.query().findOne({ email: testuser.email });
+      req.user = user;
     });
   });
 
@@ -32,72 +33,110 @@ describe('test labels', () => {
     await insertLabel(user, testlabel);
   });
 
-  it('statuses', async () => {
-    const { statusCode } = await app.inject({
-      method: 'GET',
-      url: app.reverse('labels'),
+  describe('positive case', () => {
+    test('statuses', async () => {
+      const { statusCode } = await app.inject({
+        method: 'GET',
+        url: app.reverse('labels'),
+      });
+
+      expect(statusCode).toBe(200);
     });
 
-    expect(statusCode).toBe(200);
+    test('new', async () => {
+      const { statusCode } = await app.inject({
+        method: 'GET',
+        url: app.reverse('newLabel'),
+      });
+
+      expect(statusCode).toBe(200);
+    });
+
+    test('create', async () => {
+      const newLabel = generateLabel();
+      const { statusCode } = await app.inject({
+        method: 'POST',
+        url: app.reverse('labels'),
+        payload: {
+          data: newLabel,
+        },
+      });
+
+      expect(statusCode).toBe(302);
+
+      const label = await models.label.query().findOne({ name: newLabel.name });
+
+      expect(label).toMatchObject(newLabel);
+    });
+
+    test('update', async () => {
+      const label = await models.label.query().findOne({ name: testlabel.name });
+      const form = { name: 'newLabelName' };
+
+      const { statusCode } = await app.inject({
+        method: 'PATCH',
+        url: `/labels/${label.id}`,
+        payload: {
+          data: form,
+        },
+      });
+
+      expect(statusCode).toBe(302);
+
+      const updatedLabel = await models.label.query().findOne({ name: form.name });
+      expect(updatedLabel).toMatchObject(form);
+    });
+
+    test('delete', async () => {
+      const { id } = await models.label.query().findOne({ name: testlabel.name });
+      await models.label.query().deleteById(id);
+      const { statusCode } = await app.inject({
+        method: 'DELETE',
+        url: `/labels/${id}`,
+      });
+
+      expect(statusCode).toBe(302);
+
+      const label = await models.label.query().findById(id);
+      expect(label).toBeUndefined();
+    });
   });
 
-  it('new', async () => {
-    const { statusCode } = await app.inject({
-      method: 'GET',
-      url: app.reverse('newLabel'),
+  describe('negative case', () => {
+    test('create', async () => {
+      const newLabel = { name: '' };
+      const { statusCode } = await app.inject({
+        method: 'POST',
+        url: app.reverse('labels'),
+        payload: {
+          data: newLabel,
+        },
+      });
+
+      expect(statusCode).toBe(200);
+
+      const label = await models.label.query().findOne({ name: newLabel.name });
+
+      expect(label).toBeUndefined();
     });
 
-    expect(statusCode).toBe(200);
-  });
+    test('update', async () => {
+      const label = await models.label.query().findOne({ name: testlabel.name });
+      const form = { name: '' };
 
-  it('create', async () => {
-    const newLabel = generateLabel();
-    const { statusCode } = await app.inject({
-      method: 'POST',
-      url: app.reverse('labels'),
-      payload: {
-        data: newLabel,
-      },
+      const { statusCode } = await app.inject({
+        method: 'PATCH',
+        url: `/labels/${label.id}`,
+        payload: {
+          data: form,
+        },
+      });
+
+      expect(statusCode).toBe(200);
+
+      const updatedLabel = await models.label.query().findOne({ name: form.name });
+      expect(updatedLabel).toBeUndefined();
     });
-
-    expect(statusCode).toBe(302);
-
-    const label = await models.label.query().findOne({ name: newLabel.name });
-
-    expect(label).toMatchObject(newLabel);
-  });
-
-  it('update', async () => {
-    const label = await models.label.query().findOne({ name: testlabel.name });
-    const form = { name: 'newLabelName' };
-
-    //await label.$query().patch(form);
-    const { statusCode } = await app.inject({
-      method: 'PATCH',
-      url: `/labels/${label.id}`,
-      payload: {
-        data: form,
-      },
-    });
-
-    expect(statusCode).toBe(302);
-
-    const updatedLabel = await models.label.query().findOne({ name: form.name });
-    expect(updatedLabel).toMatchObject(form);
-  });
-
-  it('delete', async () => {
-    const { id } = await models.label.query().findOne({ name: testlabel.name });
-    await models.label.query().deleteById(id);
-    const { statusCode } = await app.inject({
-      method: 'DELETE',
-      url: `/labels/${id}`,
-    });
-
-    expect(statusCode).toBe(302);
-
-    const label = await models.label.query().findById(id);
-    expect(label).toBeUndefined();
   });
 
   afterEach(async () => {

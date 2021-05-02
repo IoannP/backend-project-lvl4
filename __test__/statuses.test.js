@@ -21,7 +21,7 @@ describe('test statuses', () => {
     testuser = generateUser();
     teststatus = generateStatus();
 
-    app.addHook('preHandler', async (req, reply) => {
+    app.addHook('preHandler', async (req) => {
       const user = await models.user.query().findOne({ email: testuser.email });
       req.user = user;
     });

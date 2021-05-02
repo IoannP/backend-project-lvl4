@@ -3,7 +3,7 @@ import i18next from 'i18next';
 export default (app) => app
   .get('/statuses', { name: 'statuses' }, async (req, reply) => {
     const statuses = await app.objection.models.status.query();
-    reply.render('statuses/statuses', { statuses });
+    reply.render('statuses/list', { statuses });
     return reply;
   })
   .get('/statuses/new', { name: 'newStatus' }, (req, reply) => {

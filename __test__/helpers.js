@@ -20,6 +20,12 @@ export const insertUser = (app, form) => app.objection.models.user.query().inser
 
 export const insertStatus = (user, form) => user.$relatedQuery('status').insert(form);
 
-export const insertTask = (user, form) => user.$relatedQuery('task').insert(form);
+export const insertTask = async (user, task, knex) => {
+  let newtask;
+  await knex.transaction(async (trx) => {
+    newtask = await user.$relatedQuery('task', trx).insertGraph(task, { relate: ['labels'] });
+  });
+  return newtask;
+}; // user.$relatedQuery('task').insert(form);
 
 export const insertLabel = (user, form) => user.$relatedQuery('label').insert(form);

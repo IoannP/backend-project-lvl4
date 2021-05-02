@@ -1,17 +1,17 @@
 extends ../layouts/application.pug
 
 block content
-  a(href=route('newTask'))= t('views.task.list.create')
+  a(href=route('newTask'))= t('views.tasks.list.create')
   include ./filter.pug
   table.table.table-hover
     thead
       tr
-        th(scope='col')= t('views.task.list.id')
-        th(scope='col')= t('views.task.list.name')
-        th(scope='col')= t('views.task.list.status')
-        th(scope='col')= t('views.task.list.author')
-        th(scope='col')= t('views.task.list.performer')
-        th(scope='col')= t('views.task.list.dateCreated')
+        th(scope='col')= t('views.tasks.list.id')
+        th(scope='col')= t('views.tasks.list.name')
+        th(scope='col')= t('views.tasks.list.status')
+        th(scope='col')= t('views.tasks.list.author')
+        th(scope='col')= t('views.tasks.list.performer')
+        th(scope='col')= t('views.tasks.list.dateCreated')
         th
     tbody
       each task in tasks
@@ -24,5 +24,5 @@ block content
           td= task.performer
           td= formatDate(task.createdAt)
           td
-            a(href=`/tasks/${task.id}/edit`)= t('views.task.list.edit')
-            +buttonTo(`/tasks/${task.id}`, 'delete')(value=t('views.task.list.delete') class="btn btn-link")
+            a(href=`/tasks/${task.id}/edit`)= t('views.tasks.list.edit')
+            +buttonTo(`/tasks/${task.id}`, 'delete')(value=t('views.tasks.list.delete') class="btn btn-link")

@@ -1,13 +1,13 @@
 extends ../layouts/application.pug
 
 block content
-  a(href=route('newLabel'))= t('views.label.list.create')
+  a(href=route('newLabel'))= t('views.labels.list.create')
   table.table.table-hover
     thead
       tr
-        th(scope='col')= t('views.label.list.id')
-        th(scope='col')= t('views.label.list.name')
-        th(scope='col')= t('views.label.list.dateCreated')
+        th(scope='col')= t('views.labels.list.id')
+        th(scope='col')= t('views.labels.list.name')
+        th(scope='col')= t('views.labels.list.dateCreated')
         th
     tbody
       each label in labels
@@ -16,5 +16,5 @@ block content
           td= label.name
           td= formatDate(label.createdAt)
           td
-            a(href=`/labels/${label.id}/edit`)= t('views.label.list.edit')
-            +buttonTo(`/labels/${label.id}`, 'delete')(value=t('views.label.list.delete') class="btn btn-link")
+            a(href=`/labels/${label.id}/edit`)= t('views.labels.list.edit')
+            +buttonTo(`/labels/${label.id}`, 'delete')(value=t('views.labels.list.delete') class="btn btn-link")

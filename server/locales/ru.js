@@ -55,7 +55,7 @@ module.exports = {
           submit: 'Изменить',
         },
       },
-      status: {
+      statuses: {
         new: {
           create: 'Создание статуса',
           name: 'Наименование',
@@ -76,7 +76,7 @@ module.exports = {
           submit: 'Изменить',
         },
       },
-      task: {
+      tasks: {
         new: {
           create: 'Создание задачи',
           name: 'Наименование',
@@ -96,7 +96,7 @@ module.exports = {
           dateCreated: 'Дата создания',
           edit: 'Изменить',
           delete: 'Удалить',
-          filter:{
+          filter: {
             status: 'Статус',
             performer: 'Исполнитель',
             label: 'Метка',
@@ -123,7 +123,7 @@ module.exports = {
           delete: 'Удалить',
         },
       },
-      label: {
+      labels: {
         new: {
           create: 'Создание метки',
           name: 'Наименование',
@@ -194,7 +194,10 @@ module.exports = {
           success: 'Задача успешно изменена',
         },
         delete: {
-          error: 'Задачу может удалить только её автор',
+          error: {
+            authError: 'Задачу может удалить только её автор',
+            dependency: 'Нельзя удалить задачу, у которой есть хотя бы одна метка',
+          },
           success: 'Задача успешно удалена',
         },
       },
