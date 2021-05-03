@@ -1,7 +1,7 @@
 .jumbotron.p-2
   +formFor()(action=route('tasks') method='get').form-inline
     +selectList(task, statuses, 'statusId', t('views.tasks.list.filter.status'))(class="ml-2 mr-3")
-    +selectList(task, performers, 'performerId', t('views.tasks.list.filter.performer'))(class="ml-2 mr-3")
+    +selectList(task, executors, 'executorId', t('views.tasks.list.filter.executor'))(class="ml-2 mr-3")
     +selectList(task, labels, 'labels', t('views.tasks.list.filter.label'))(class="ml-2 mr-3")
     .form-group.form-check
       if task.isCreatorUser

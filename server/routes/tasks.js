@@ -7,24 +7,24 @@ export default (app) => app
     const { knex } = app.objection;
     const { id } = req.user;
 
-    const performers = await models.user.query();
+    const executors = await models.user.query();
     const statuses = await models.status.query();
     const lbs = await models.label.query();
     const task = reply.request.query || new models.task();
 
     const {
-      performerId,
+      executorId,
       statusId,
       labels,
       isCreatorUser,
     } = task;
     let tsks = models.task.query();
-    if (performerId) tsks = tsks.where('performerId', performerId);
+    if (executorId) tsks = tsks.where('executorId', executorId);
     if (statusId) tsks = tsks.where('statusId', statusId);
     if (labels) {
       tsks = tsks.whereExists(knex('task_labels').whereRaw('label_id = ?', labels).whereRaw('task_labels.task_id = tasks.id'));
     }
-    if (isCreatorUser) tsks = tsks.where('authorId', id);
+    if (isCreatorUser) tsks = tsks.where('creatorId', id);
     tsks = await tsks.orderBy('id');
 
     const formatedTasks = tsks.map(req.getTaskData);
@@ -33,7 +33,7 @@ export default (app) => app
     reply.render('tasks/list', {
       task,
       tasks,
-      performers,
+      executors,
       statuses,
       labels: lbs,
     });
@@ -42,14 +42,14 @@ export default (app) => app
   .get('/tasks/new', { name: 'newTask' }, async (req, reply) => {
     const { models } = app.objection;
     const task = reply.entity('task') || new app.objection.models.task();
-    const performers = await models.user.query();
+    const executors = await models.user.query();
     const statuses = await models.status.query();
     const labels = await models.label.query();
     const errors = reply.errors();
 
     reply.render('tasks/new', {
       task,
-      performers,
+      executors,
       statuses,
       labels,
       errors,
@@ -96,14 +96,14 @@ export default (app) => app
     const task = await models.task.query().findById(id).withGraphFetched('labels');
     _.update(task, 'labels', (labels) => labels.map((label) => label.id));
 
-    const performers = await models.user.query();
+    const executors = await models.user.query();
     const statuses = await models.status.query();
     const labels = await models.label.query();
     const errors = reply.errors();
 
     reply.render('tasks/edit', {
       task,
-      performers,
+      executors,
       statuses,
       labels,
       errors,

@@ -9,9 +9,9 @@ block content
         th(scope='col')= t('views.tasks.list.id')
         th(scope='col')= t('views.tasks.list.name')
         th(scope='col')= t('views.tasks.list.status')
-        th(scope='col')= t('views.tasks.list.author')
-        th(scope='col')= t('views.tasks.list.performer')
-        th(scope='col')= t('views.tasks.list.dateCreated')
+        th(scope='col')= t('views.tasks.list.creator')
+        th(scope='col')= t('views.tasks.list.executor')
+        th(scope='col')= t('views.tasks.list.createdAt')
         th
     tbody
       each task in tasks
@@ -20,8 +20,8 @@ block content
           td
             a(href=`/tasks/${task.id}`)= task.name
           td= task.status
-          td= task.author
-          td= task.performer
+          td= task.creator
+          td= task.executor
           td= formatDate(task.createdAt)
           td
             a(href=`/tasks/${task.id}/edit`)= t('views.tasks.list.edit')

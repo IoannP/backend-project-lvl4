@@ -126,16 +126,16 @@ const addPlugins = (app) => {
 
   app.decorateRequest('getTaskData', async (task) => {
     const { models } = app.objection;
-    const author = await models.user.query().findById(task.authorId);
-    const performer = await models.user.query().findById(task.performerId);
+    const creator = await models.user.query().findById(task.creatorId);
+    const executor = await models.user.query().findById(task.executorId);
     const status = await models.status.query().findById(task.statusId);
     const labels = await task.$relatedQuery('labels');
 
     return {
       id: task.id,
       name: task.name,
-      author: author.getFullName(),
-      performer: performer ? performer.getFullName() : '',
+      creator: creator.getFullName(),
+      executor: executor ? executor.getFullName() : '',
       status: status.name,
       labels: labels.map((label) => label.name),
       description: task.description,

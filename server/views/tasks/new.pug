@@ -10,6 +10,6 @@ block content
         label(for="data_description")= t('views.tasks.new.description')
         textarea.form-control(id="data_description" name="data[description]" rows="3")
     +select(task, statuses, 'statusId', t('views.tasks.new.status'), errors)
-    +select(task, performers, 'performerId', t('views.tasks.new.performer'), errors)
-    +select(task, labels, 'labels', t('views.tasks.new.marking'), errors)(multiple="multiple")
+    +select(task, executors, 'executorId', t('views.tasks.new.executor'), errors)
+    +select(task, labels, 'labels', t('views.tasks.new.labels'), errors)(multiple="multiple")
     +submit()(value=t('views.tasks.new.submit'))

@@ -1,5 +1,3 @@
-// @ts-check
-
 import i18next from 'i18next';
 import _ from 'lodash';
 
@@ -8,8 +6,8 @@ export default (app) => ({
     return i18next.t(key);
   },
   _,
-  route(name, p) {
-    return app.reverse(name, p);
+  route(name) {
+    return app.reverse(name);
   },
   getAlertClass(type) {
     switch (type) {
@@ -29,7 +27,7 @@ export default (app) => ({
   },
   getEntityName(entity, type) {
     switch (type) {
-      case 'performerId':
+      case 'executorId':
         return entity.getFullName();
       case 'statusId':
         return entity.name;
@@ -40,11 +38,11 @@ export default (app) => ({
     }
   },
   isSameId({ id }, type, entity) {
-    const { performerId, statusId, labels } = entity;
+    const { executorId, statusId, labels } = entity;
 
     switch (type) {
-      case 'performerId':
-        return id === Number(performerId);
+      case 'executorId':
+        return id === Number(executorId);
       case 'statusId':
         return id === Number(statusId);
       case 'labels': {
