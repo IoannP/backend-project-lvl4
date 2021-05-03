@@ -5,8 +5,8 @@ block header
 
 block content
   +formFor()(action=`/users/${user.id}` method="post")
-    +input(user, 'firstname', t('views.users.edit.firstname'), errors)(type="text")
-    +input(user, 'lastname', t('views.users.edit.lastname'), errors)(type="text")
+    +input(user, 'firstName', t('views.users.edit.firstname'), errors)(type="text")
+    +input(user, 'lastName', t('views.users.edit.lastname'), errors)(type="text")
     +input(user, 'email', t('views.users.edit.email'), errors)(type="email")
     +input({}, 'password', t('views.users.edit.password'), errors)(type="password")
     input(name="_method" type="hidden" value="patch")

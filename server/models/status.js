@@ -20,10 +20,10 @@ export default class Status extends unique(Model) {
       type: 'object',
       required: ['name'],
       properties: {
-        user_id: { type: 'integer' },
+        creatorId: { type: 'integer' },
         name: { type: 'string', minLength: 1, maxLength: 255 },
-        date_created: { type: 'string' },
-        date_updated: { type: 'string' },
+        createdAt: { type: 'string' },
+        updatedAt: { type: 'string' },
       },
     };
   }
@@ -34,13 +34,13 @@ export default class Status extends unique(Model) {
         relation: Model.BelongsToOneRelation,
         modelClass: path.join(__dirname, 'user'),
         join: {
-          from: 'statuses.user_id',
+          from: 'statuses.creator_id',
           to: 'users.id',
         },
       },
       task: {
         relation: Model.HasManyRelation,
-        modelClass: path.join(__dirname, 'tasx'),
+        modelClass: path.join(__dirname, 'task'),
         join: {
           from: 'status.id',
           to: 'task.status_id',

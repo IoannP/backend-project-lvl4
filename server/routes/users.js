@@ -12,8 +12,9 @@ export default (app) => app
     return reply;
   })
   .post('/users', async (req, reply) => {
+    const { data } = req.body;
     try {
-      const user = await app.objection.models.user.fromJson(req.body.data);
+      const user = await app.objection.models.user.fromJson(data);
       await app.objection.models.user.query().insert(user);
 
       req.flash('info', i18next.t('flash.users.create.success'));
@@ -21,7 +22,7 @@ export default (app) => app
       return reply;
     } catch (error) {
       req.flash('error', i18next.t('flash.users.create.error'));
-      reply.render('users/new', { user: req.body.data, errors: error.data });
+      reply.render('users/new', { user: data, errors: error.data });
       return reply;
     }
   })
@@ -31,12 +32,12 @@ export default (app) => app
 
     if (!req.isAuthenticated()) {
       req.flash('error', i18next.t('flash.authError'));
-      reply.redirect(app.reverse('root'));
+      reply.redirect(app.reverse('users'));
       return reply;
     }
 
     if (user.id !== Number(id)) {
-      req.flash('error', i18next.t('flash.users.delete.autherror'));
+      req.flash('error', i18next.t('flash.users.delete.authError'));
       reply.redirect(app.reverse('users'));
       return reply;
     }
@@ -69,12 +70,12 @@ export default (app) => app
 
     if (!req.isAuthenticated()) {
       req.flash('error', i18next.t('flash.authError'));
-      reply.redirect(app.reverse('root'));
+      reply.redirect(app.reverse('users'));
       return reply;
     }
 
     if (user.id !== Number(id)) {
-      req.flash('error', i18next.t('flash.users.delete.autherror'));
+      req.flash('error', i18next.t('flash.users.delete.authError'));
       reply.redirect(app.reverse('users'));
       return reply;
     }

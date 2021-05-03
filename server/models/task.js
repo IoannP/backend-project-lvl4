@@ -34,7 +34,7 @@ export default class Task extends unique(Model) {
       required: ['name', 'statusId'],
       properties: {
         name: { type: 'string', minLength: 1, maxLength: 255 },
-        authorId: { type: 'integer' },
+        creatorId: { type: 'integer' },
         description: { type: 'string' },
         performerId: { type: 'integer' },
         statusId: { type: 'integer', minimum: 1, default: null },
@@ -49,7 +49,7 @@ export default class Task extends unique(Model) {
         relation: Model.BelongsToOneRelation,
         modelClass: path.join(__dirname, 'user'),
         join: {
-          from: 'tasks.author_id',
+          from: 'tasks.creator_id',
           to: 'users.id',
         },
       },
