@@ -28,10 +28,11 @@ module.exports = {
   production: {
     client: 'pg',
     connection: {
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB,
+      host: process.env.PROD_DB_HOST,
+      port: process.env.PROD_DB_PORT,
+      user: process.env.PROD_DB_USER,
+      password: process.env.PROD_DB_PASSWORD,
+      database: process.env.PROD_DB,
     },
     useNullAsDefault: true,
     migrations,

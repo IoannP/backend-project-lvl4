@@ -36,7 +36,6 @@
       "dotenv": "^8.2.0",
       "faker": "^5.5.2",
       "fastify": "^3.14.0",
-      "fastify-error-page": "^4.0.0",
       "fastify-flash": "^2.0.2",
       "fastify-formbody": "^5.0.0",
       "fastify-method-override": "^1.5.4",
@@ -60,7 +59,8 @@
       "pug": "^3.0.2",
       "qs": "^6.10.0",
       "rollbar": "^2.21.1",
-      "webpack": "^5.27.0"
+      "webpack": "^5.27.0",
+      "youch": "^2.2.1"
    },
    "devDependencies": {
       "@babel/cli": "^7.13.10",

@@ -5,13 +5,13 @@ import fastify from 'fastify';
 import fastifyObjectionjs from 'fastify-objectionjs';
 import fastifySession from 'fastify-secure-session';
 import fastifyPassport from 'fastify-passport';
-import fastifyErrorPage from 'fastify-error-page';
 import fastifyMethodOverride from 'fastify-method-override';
 import { plugin as fastifyReverseRoutes } from 'fastify-reverse-routes';
 import fastifyFormbody from 'fastify-formbody';
 import fastifyStatic from 'fastify-static';
 import pointOfView from 'point-of-view';
 import Pug from 'pug';
+import Youch from 'youch';
 import i18next from 'i18next';
 import Rollbar from 'rollbar';
 import qs from 'qs';
@@ -73,7 +73,6 @@ const addPlugins = (app) => {
   });
   app.register(fastifyFormbody, { parser: qs.parse });
   app.register(fastifyReverseRoutes);
-  if (isDevelopment) app.register(fastifyErrorPage);
   app.register(fastifySession, {
     secret: process.env.SESSION_KEY,
     cookie: {
@@ -167,8 +166,16 @@ const setErrorHandler = (app) => {
   });
 
   app.setErrorHandler((err, req, reply) => {
-    app.log.debug(err);
-    rollbar.errorHander()(err, req, reply, (error) => reply.send(error));
+    rollbar.error(err, req, reply);
+    try {
+      const youch = new Youch(err, req.raw);
+      youch.toHTML().then((html) => {
+        reply.type('text/html');
+        reply.send(html);
+      });
+    } catch (error) {
+      reply.send(error);
+    }
   });
 };
 
@@ -195,7 +202,7 @@ export default () => {
   addPlugins(app);
   addRoutes(app);
   addHooks(app);
-  if (isProduction) setErrorHandler(app);
+  setErrorHandler(app);
 
   return app;
 };
