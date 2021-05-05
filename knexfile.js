@@ -28,6 +28,9 @@ module.exports = {
   production: {
     client: 'pg',
     connection: 'postgres://hbeeepvnlxgqnd:5ee9d49ae3ebb2cdda344d078fc2ca801112b34a2e92881ad616137a4bc4c71f@ec2-54-216-185-51.eu-west-1.compute.amazonaws.com:5432/ddt3ld9cics00d',
+    ssl: {
+      rejectUnauthorized: false,
+    },
     useNullAsDefault: true,
     migrations,
   },
