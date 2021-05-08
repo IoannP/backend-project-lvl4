@@ -125,9 +125,14 @@ const addPlugins = (app) => {
 
   app.decorateRequest('getTaskData', async (task) => {
     const { models } = app.objection;
-    const creator = await models.user.query().findById(task.creatorId);
-    const executor = await models.user.query().findById(task.executorId);
-    const status = await models.status.query().findById(task.statusId);
+    const {
+      creatorId,
+      executorId,
+      statusId,
+    } = task;
+    const creator = await models.user.query().findById(creatorId);
+    const executor = executorId ? await models.user.query().findById(executorId) : '';
+    const status = await models.status.query().findById(statusId);
     const labels = await task.$relatedQuery('labels');
 
     return {

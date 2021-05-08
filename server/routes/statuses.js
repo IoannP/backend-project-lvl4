@@ -13,17 +13,20 @@ export default (app) => app
   .post('/statuses', async (req, reply) => {
     try {
       const { id } = req.user;
-      const status = await app.objection.models.status.fromJson(req.body.data);
-      const user = await app.objection.models.user.query().findById(id);
+      const { models } = app.objection;
+
+      const status = await models.status.fromJson(req.body.data);
+      const user = await models.user.query().findById(id);
 
       await user.$relatedQuery('status').insert(status);
 
       req.flash('info', i18next.t('flash.statuses.create.success'));
       reply.redirect(app.reverse('statuses'));
+
       return reply;
-    } catch ({ data }) {
+    } catch (error) {
       req.flash('error', i18next.t('flash.statuses.create.error'));
-      reply.render('statuses/new', { user: req.body.data, errors: data });
+      reply.render('statuses/new', { user: req.body.data, errors: error.data });
       return reply;
     }
   })
@@ -36,13 +39,16 @@ export default (app) => app
   .patch('/statuses/:id', async (req, reply) => {
     const { id } = req.params;
     try {
-      const patchForm = await app.objection.models.status.fromJson(req.body.data);
-      const status = await app.objection.models.status.query().findById(id);
+      const { models } = app.objection;
+
+      const patchForm = await models.status.fromJson(req.body.data);
+      const status = await models.status.query().findById(id);
 
       await status.$query().update(patchForm);
 
       req.flash('info', i18next.t('flash.statuses.edit.success'));
       reply.redirect(app.reverse('statuses'));
+
       return reply;
     } catch ({ data }) {
       req.body.data.id = id;

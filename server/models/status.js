@@ -30,7 +30,7 @@ export default class Status extends unique(Model) {
 
   static get relationMappings() {
     return {
-      owner: {
+      user: {
         relation: Model.BelongsToOneRelation,
         modelClass: path.join(__dirname, 'user'),
         join: {

@@ -1,3 +1,4 @@
+import {ForeignKeyViolationError} from 'objection'
 import i18next from 'i18next';
 import _ from 'lodash';
 
@@ -64,6 +65,7 @@ export default (app) => app
 
       const task = await models.task.fromJson(req.body.data);
       const user = await models.user.query().findById(id);
+
       const labels = task.labels.map((value) => ({ id: value }));
       task.labels = labels;
 
@@ -144,15 +146,16 @@ export default (app) => app
   .delete('/tasks/:id', async (req, reply) => {
     const { id } = req.params;
     const { models } = app.objection;
-    const { authorId, labels } = await models.task.query().findById(id).withGraphFetched('labels');
+    const { creatorId, labels } = await models.task.query().findById(id).withGraphFetched('labels');
+    const userId = req.user.id;
 
     if (labels.length > 0) {
       req.flash('error', i18next.t('flash.tasks.delete.error.dependency'));
     }
-    if (req.user.id !== authorId) {
+    if (userId !== creatorId) {
       req.flash('error', i18next.t('flash.tasks.delete.error.authError'));
     }
-    if (req.user.id === authorId && labels.length === 0) {
+    if (userId === creatorId && labels.length === 0) {
       await models.task.query().deleteById(id);
       req.flash('info', i18next.t('flash.tasks.delete.success'));
     }
