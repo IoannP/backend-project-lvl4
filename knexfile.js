@@ -33,6 +33,10 @@ module.exports = {
       user: process.env.PROD_DB_USER,
       password: process.env.PROD_DB_PASSWORD,
       database: process.env.PROD_DB,
+      database_url: process.env.PROD_DB_URL,
+      ssl: {
+        rejectUnauthorized: false,
+      },
     },
     useNullAsDefault: true,
     migrations,
