@@ -5,16 +5,16 @@ const migrations = {
 };
 
 module.exports = {
-  // development: {
-  //   client: 'pg',
-  //   connection: {
-  //     user: 'ioann',
-  //     password: process.env.DEV_DB_PASSWORD,
-  //     database: 'manager',
-  //   },
-  //   useNullAsDefault: true,
-  //   migrations,
-  // },
+  development: {
+    client: 'pg',
+    connection: {
+      user: 'ioann',
+      password: process.env.DEV_DB_PASSWORD,
+      database: 'manager',
+    },
+    useNullAsDefault: true,
+    migrations,
+  },
   test: {
     client: 'pg',
     connection: {
@@ -25,7 +25,7 @@ module.exports = {
     useNullAsDefault: true,
     migrations,
   },
-  development: {
+  production: {
     client: 'pg',
     connection: {
       host: process.env.PROD_DB_HOST,
