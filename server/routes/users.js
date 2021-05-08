@@ -2,8 +2,6 @@ import i18next from 'i18next';
 
 export default (app) => app
   .get('/users', { name: 'users' }, async (req, reply) => {
-    console.log('--------------------------')
-    console.log(process.env.NODE_ENV)
     const users = await app.objection.models.user.query();
     reply.render('users/list', { users });
     return reply;
