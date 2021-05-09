@@ -1,8 +1,8 @@
 import faker from 'faker';
 
 export const generateUser = () => ({
-  firstname: faker.name.firstName(),
-  lastname: faker.name.lastName(),
+  firstName: faker.name.firstName(),
+  lastName: faker.name.lastName(),
   email: faker.internet.email(),
   password: faker.internet.password(),
 });

@@ -1,4 +1,3 @@
-import {ForeignKeyViolationError} from 'objection'
 import i18next from 'i18next';
 import _ from 'lodash';
 

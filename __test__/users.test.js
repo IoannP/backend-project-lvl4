@@ -66,8 +66,8 @@ describe('test users', () => {
     test('update', async () => {
       const user = await models.user.query().findOne({ email: testuser.email });
       const updateForm = {
-        firstname: testuser.firstname,
-        lastname: testuser.lastname,
+        firstName: testuser.firstName,
+        lastName: testuser.lastName,
         email: 'test@mail.com',
         password: testuser.password,
       };
@@ -104,7 +104,7 @@ describe('test users', () => {
   describe('negative case', () => {
     test('create', async () => {
       const newUser = generateUser();
-      newUser.firstname = '';
+      newUser.firstName = '';
 
       await app.inject({
         method: 'POST',
@@ -118,16 +118,16 @@ describe('test users', () => {
     });
 
     test('update', async () => {
-      const user = await models.user.query().findOne({ email: testuser.email });
+      // const user = await models.user.query().findOne({ email: testuser.email });
       const updateForm = {
-        firstname: testuser.firstname,
-        lastname: testuser.lastname,
+        firstName: testuser.firstName,
+        lastName: testuser.lastName,
         email: 'test@mail.com',
       };
 
       const { statusCode } = await app.inject({
         method: 'PATCH',
-        url: `/users/${user.id}`,
+        url: `/users/${testuser.id}`,
         payload: {
           data: updateForm,
         },

@@ -10,6 +10,7 @@ import { plugin as fastifyReverseRoutes } from 'fastify-reverse-routes';
 import fastifyFormbody from 'fastify-formbody';
 import fastifyStatic from 'fastify-static';
 import pointOfView from 'point-of-view';
+import dotenv from 'dotenv';
 import Pug from 'pug';
 import Youch from 'youch';
 import i18next from 'i18next';
@@ -30,7 +31,7 @@ import FormStrategy from './lib/passpot_strategies/form_strategy.js';
 const mode = process.env.NODE_ENV || 'development';
 const isProduction = mode === 'production';
 const isDevelopment = mode === 'development';
-require('dotenv').config();
+dotenv.config();
 
 const setupViews = (app) => {
   const { devServer } = webpackConfig;
@@ -68,7 +69,7 @@ const setupLocalization = () => {
 
 const addPlugins = (app) => {
   app.register(fastifyObjectionjs, {
-    knexConfig: knexConfig[mode],
+    knexConfig: knexConfig()[mode],
     models: entitiesModels,
   });
   app.register(fastifyFormbody, { parser: qs.parse });

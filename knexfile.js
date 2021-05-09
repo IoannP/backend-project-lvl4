@@ -4,36 +4,18 @@ const migrations = {
   directory: path.join(__dirname, 'server', 'migrations'),
 };
 
-module.exports = {
-  development: {
-    client: 'pg',
-    connection: {
-      user: 'ioann',
-      password: process.env.DEV_DB_PASSWORD,
-      database: 'manager',
-    },
-    useNullAsDefault: true,
-    migrations,
-  },
-  test: {
-    client: 'pg',
-    connection: {
-      user: 'ioann',
-      password: process.env.DEV_DB_PASSWORD,
-      database: 'test',
-    },
-    useNullAsDefault: true,
-    migrations,
-  },
+const { env } = process;
+
+module.exports = () => ({
   production: {
-    client: 'pg',
+    client: env.PROD_DB_TYPE,
     connection: {
-      host: process.env.PROD_DB_HOST,
-      port: process.env.PROD_DB_PORT,
-      user: process.env.PROD_DB_USER,
-      password: process.env.PROD_DB_PASSWORD,
-      database: process.env.PROD_DB,
-      database_url: process.env.PROD_DB_URL,
+      user: env.PROD_DB_USER,
+      password: env.PROD_DB_PASSWORD,
+      database: env.PROD_DB_NAME,
+      host: env.PROD_DB_HOST,
+      port: env.PROD_DB_PORT,
+      database_url: env.PROD_DB_URL,
       ssl: {
         rejectUnauthorized: false,
       },
@@ -41,4 +23,28 @@ module.exports = {
     useNullAsDefault: true,
     migrations,
   },
-};
+  development: {
+    client: env.DEV_DB_TYPE,
+    connection: {
+      user: env.DEV_DB_USER,
+      password: env.DEV_DB_PASSWORD,
+      database: env.DEV_DB_NAME,
+      host: env.DEV_DB_HOST,
+      port: env.DEV_DB_PORT,
+    },
+    useNullAsDefault: true,
+    migrations,
+  },
+  test: {
+    client: env.TEST_DB_TYPE,
+    connection: {
+      user: env.TEST_DB_USER,
+      password: env.TEST_DB_PASSWORD,
+      database: env.TEST_DB_NAME,
+      host: env.TEST_DB_HOST,
+      port: env.TEST_DB_PORT,
+    },
+    useNullAsDefault: true,
+    migrations,
+  },
+});
