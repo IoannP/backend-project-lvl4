@@ -6,7 +6,7 @@ const migrations = {
 
 const { env } = process;
 
-module.exports = () => ({
+export default () => ({
   production: {
     client: env.PROD_DB_TYPE,
     connection: {
