@@ -24,7 +24,7 @@ import webpackConfig from '../webpack.config.babel.js';
 
 import addRoutes from './routes/index.js';
 import getHelpers from './helpers/index.js';
-import knexConfig from '../knexfile';
+// import knexConfig from '../knexfile';
 import entitiesModels from './models';
 import FormStrategy from './lib/passpot_strategies/form_strategy.js';
 
@@ -32,6 +32,8 @@ const mode = process.env.NODE_ENV || 'development';
 const isProduction = mode === 'production';
 const isDevelopment = mode === 'development';
 dotenv.config();
+
+const knexConfig = require('../knexfile');
 
 const setupViews = (app) => {
   const { devServer } = webpackConfig;
@@ -69,7 +71,7 @@ const setupLocalization = () => {
 
 const addPlugins = (app) => {
   app.register(fastifyObjectionjs, {
-    knexConfig: knexConfig()[mode],
+    knexConfig: knexConfig[mode],
     models: entitiesModels,
   });
   app.register(fastifyFormbody, { parser: qs.parse });

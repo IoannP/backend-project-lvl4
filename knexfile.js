@@ -6,7 +6,7 @@ const migrations = {
 
 const { env } = process;
 
-export default () => ({
+module.exports = {
   production: {
     client: env.PROD_DB_TYPE,
     connection: {
@@ -47,4 +47,4 @@ export default () => ({
     useNullAsDefault: true,
     migrations,
   },
-});
+};

@@ -21,6 +21,8 @@ jobs:
         run: make install
       - name: Run ESLint
         run: make lint
+      - name: Set config
+        run: make set-config
       - name: test coverage
         uses: paambaati/codeclimate-action@v2.7.2
         env:

@@ -1,7 +1,7 @@
 setup:
 	install create-config db-migrate
 
-create-config:
+set-config:
 	cp .env.example .env || true
 
 run:
