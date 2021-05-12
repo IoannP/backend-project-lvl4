@@ -46,7 +46,12 @@ describe('test tasks', () => {
     await knex.migrate.latest();
     testuser = await insertUser(app, testuserData);
     teststatus = await insertStatus(testuser, teststatusData);
-    testlabels = await insertLabel(testuser, testlabelsData);
+    testlabels = testlabelsData.map(async (labelData) => {
+      const label = await insertLabel(testuser, labelData);
+      return label;
+    });
+
+    testlabels = await Promise.all(testlabels);
 
     testtaskDataWithLabel.statusId = teststatus.id;
     testtaskDataWithLabel.labels = testlabels.map((label) => ({ id: label.id }));

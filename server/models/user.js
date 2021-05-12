@@ -52,6 +52,14 @@ export default class User extends unique(password(Model)) {
           to: 'tasks.creator_id',
         },
       },
+      task_executor: {
+        relation: Model.HasManyRelation,
+        modelClass: path.join(__dirname, 'task'),
+        join: {
+          from: 'users.id',
+          to: 'tasks.executor_id',
+        },
+      },
       label: {
         relation: Model.HasManyRelation,
         modelClass: path.join(__dirname, 'label'),

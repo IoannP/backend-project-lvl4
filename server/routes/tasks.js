@@ -1,3 +1,4 @@
+import { UniqueViolationError } from 'objection';
 import i18next from 'i18next';
 import _ from 'lodash';
 
@@ -76,6 +77,9 @@ export default (app) => app
       reply.redirect(app.reverse('tasks'));
       return reply;
     } catch (error) {
+      if (error instanceof UniqueViolationError) {
+        error.data = { name: [{ message: 'name already in use' }] };
+      }
       req.flash('error', i18next.t('flash.tasks.create.error'));
       req.errors(error.data);
       req.entity('task', req.body.data);

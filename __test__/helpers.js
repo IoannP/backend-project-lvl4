@@ -26,6 +26,6 @@ export const insertTask = async (user, task, knex) => {
     newtask = await user.$relatedQuery('task', trx).insertGraph(task, { relate: ['labels'] });
   });
   return newtask;
-}; // user.$relatedQuery('task').insert(form);
+};
 
 export const insertLabel = (user, form) => user.$relatedQuery('label').insert(form);

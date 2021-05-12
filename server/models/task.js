@@ -1,12 +1,10 @@
-// @ts-check
-
 import path from 'path';
 import { Model, AjvValidator } from 'objection';
-import objectionUnique from 'objection-unique';
+// import objectionUnique from 'objection-unique';
 
-const unique = objectionUnique({ fields: ['name'] });
+// const unique = objectionUnique({ fields: ['name'] });
 
-export default class Task extends unique(Model) {
+export default class Task extends Model {
   static get tableName() {
     return 'tasks';
   }
@@ -45,11 +43,19 @@ export default class Task extends unique(Model) {
 
   static get relationMappings() {
     return {
-      owner: {
+      creator: {
         relation: Model.BelongsToOneRelation,
         modelClass: path.join(__dirname, 'user'),
         join: {
           from: 'tasks.creator_id',
+          to: 'users.id',
+        },
+      },
+      executor: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: path.join(__dirname, 'user'),
+        join: {
+          from: 'tasks.executor_id',
           to: 'users.id',
         },
       },
@@ -65,12 +71,12 @@ export default class Task extends unique(Model) {
           to: 'labels.id',
         },
       },
-      performer: {
+      status: {
         relation: Model.BelongsToOneRelation,
-        modelClass: path.join(__dirname, 'user'),
+        modelClass: path.join(__dirname, 'status'),
         join: {
-          from: 'tasks.performer_id',
-          to: 'users.id',
+          from: 'tasks.status_id',
+          to: 'statuses.id',
         },
       },
     };
