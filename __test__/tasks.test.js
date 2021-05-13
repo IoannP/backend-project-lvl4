@@ -17,12 +17,10 @@ describe('test tasks', () => {
   let models;
   let testuserData;
   let teststatusData;
-  let testtaskDataWithLabel;
   let testtaskData;
   let testlabelsData;
   let testuser;
   let teststatus;
-  let testtaskWithLabel;
   let testtask;
   let testlabels;
 
@@ -32,7 +30,6 @@ describe('test tasks', () => {
     models = app.objection.models;
     testuserData = generateUser();
     teststatusData = generateStatus();
-    testtaskDataWithLabel = generateTask();
     testtaskData = generateTask();
     testlabelsData = [generateLabel(), generateLabel()];
 
@@ -52,12 +49,7 @@ describe('test tasks', () => {
     });
 
     testlabels = await Promise.all(testlabels);
-
-    testtaskDataWithLabel.statusId = teststatus.id;
-    testtaskDataWithLabel.labels = testlabels.map((label) => ({ id: label.id }));
     testtaskData.statusId = teststatus.id;
-
-    testtaskWithLabel = await insertTask(testuser, testtaskDataWithLabel, knex);
     testtask = await insertTask(testuser, testtaskData, knex);
   });
 
@@ -181,19 +173,6 @@ describe('test tasks', () => {
       const task = await models.task.query().findOne({ name: form.name });
 
       expect(task).toBeUndefined();
-    });
-
-    test('delete', async () => {
-      const { id } = testtaskWithLabel;
-      const { statusCode } = await app.inject({
-        method: 'DELETE',
-        url: `/tasks/${id}`,
-      });
-
-      expect(statusCode).toBe(302);
-
-      const task = await models.task.query().findById(id);
-      expect(task).not.toBeUndefined();
     });
   });
 

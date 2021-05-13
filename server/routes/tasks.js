@@ -147,20 +147,21 @@ export default (app) => app
   .delete('/tasks/:id', async (req, reply) => {
     const { id } = req.params;
     const { models } = app.objection;
-    const { creatorId, labels } = await models.task.query().findById(id).withGraphFetched('labels');
+    const { creatorId } = await models.task.query().findById(id).withGraphFetched('labels');
     const userId = req.user.id;
 
-    if (labels.length > 0) {
-      req.flash('error', i18next.t('flash.tasks.delete.error.dependency'));
-    }
-    if (userId !== creatorId) {
-      req.flash('error', i18next.t('flash.tasks.delete.error.authError'));
-    }
-    if (userId === creatorId && labels.length === 0) {
+    if (userId === creatorId) {
+      await models.task.query().upsertGraph({
+        id,
+        labels: [],
+      }, {
+        unrelate: true,
+      });
       await models.task.query().deleteById(id);
       req.flash('info', i18next.t('flash.tasks.delete.success'));
+    } else {
+      req.flash('error', i18next.t('flash.tasks.delete.error.authError'));
     }
 
     reply.redirect(app.reverse('tasks'));
-    return reply;
   });
