@@ -5,7 +5,7 @@ module.exports = {
       application: {
         users: 'Пользователи',
         statuses: 'Статусы',
-        labels: 'Μетки',
+        labels: 'Метки',
         tasks: 'Задачи',
         signIn: 'Вход',
         signUp: 'Регистрация',
