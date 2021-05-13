@@ -9,6 +9,23 @@ export default class Task extends Model {
     return 'tasks';
   }
 
+  static get modifiers() {
+    return {
+      byStatus(query, stutusid) {
+        if (stutusid) query.where('statusId', stutusid);
+      },
+      byExecutor(query, executorId) {
+        if (executorId) query.where('executorId', executorId);
+      },
+      byLabel(query, labelId, knex) {
+        if (labelId) query.whereExists(knex('task_labels').whereRaw('label_id = ?', labelId).whereRaw('task_labels.task_id = tasks.id'));
+      },
+      byCreator(query, isCreatorUser, userId) {
+        if (isCreatorUser) query.where('creatorId', userId);
+      },
+    };
+  }
+
   static createValidator() {
     return new AjvValidator({
       onCreateAjv: (avj) => avj,

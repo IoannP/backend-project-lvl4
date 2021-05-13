@@ -26,28 +26,37 @@ export default (app) => ({
     return date.toLocaleString();
   },
   getEntityName(entity, type) {
-    switch (type) {
-      case 'executorId':
+    const [match] = type.match(/status|executor|label/ig);
+    switch (match) {
+      case 'executor':
         return entity.getFullName();
-      case 'statusId':
+      case 'status':
         return entity.name;
-      case 'labels':
+      case 'label':
         return entity.name;
       default:
         throw new Error(`Unknown entity type: '${type}'`);
     }
   },
   isSameId({ id }, type, entity) {
-    const { executorId, statusId, labels } = entity;
+    const {
+      executorId,
+      executor,
+      statusId,
+      status,
+      labels,
+      label,
+    } = entity;
+    const [match] = type.match(/status|executor|label/ig);
 
-    switch (type) {
-      case 'executorId':
-        return id === Number(executorId);
-      case 'statusId':
-        return id === Number(statusId);
-      case 'labels': {
-        const labelId = labels
-          ? [...labels].find((value) => id === Number(value))
+    switch (match) {
+      case 'executor':
+        return id === Number(executorId) || id === Number(executor);
+      case 'status':
+        return id === Number(statusId) || id === Number(status);
+      case 'label': {
+        const labelId = labels || label
+          ? [labels, label].flat().find((value) => id === Number(value))
           : undefined;
 
         return !_.isUndefined(labelId);

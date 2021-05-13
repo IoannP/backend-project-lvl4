@@ -14,19 +14,17 @@ export default (app) => app
     const task = reply.request.query || new models.task();
 
     const {
-      executorId,
-      statusId,
-      labels,
+      executor,
+      status,
+      label,
       isCreatorUser,
     } = task;
-    let tsks = models.task.query();
-    if (executorId) tsks = tsks.where('executorId', executorId);
-    if (statusId) tsks = tsks.where('statusId', statusId);
-    if (labels) {
-      tsks = tsks.whereExists(knex('task_labels').whereRaw('label_id = ?', labels).whereRaw('task_labels.task_id = tasks.id'));
-    }
-    if (isCreatorUser) tsks = tsks.where('creatorId', id);
-    tsks = await tsks.orderBy('id');
+    const tsks = await models.task.query()
+      .modify('byStatus', status)
+      .modify('byExecutor', executor)
+      .modify('byLabel', label, knex)
+      .modify('byCreator', isCreatorUser, id)
+      .orderBy('id');
 
     const formatedTasks = tsks.map(req.getTaskData);
     const tasks = await Promise.all(formatedTasks);
