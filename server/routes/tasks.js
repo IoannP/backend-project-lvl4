@@ -147,7 +147,7 @@ export default (app) => app
   .delete('/tasks/:id', async (req, reply) => {
     const { id } = req.params;
     const { models } = app.objection;
-    const { creatorId } = await models.task.query().findById(id).withGraphFetched('labels');
+    const { creatorId } = await models.task.query().findById(id);
     const userId = req.user.id;
 
     if (userId === creatorId) {

@@ -37,7 +37,7 @@ export default (app) => app
     }
 
     if (user.id !== Number(id)) {
-      req.flash('error', i18next.t('flash.users.delete.authError'));
+      req.flash('error', i18next.t('flash.users.edit.authError'));
       reply.redirect(app.reverse('users'));
       return reply;
     }
