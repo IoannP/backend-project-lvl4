@@ -2,7 +2,7 @@ import i18next from 'i18next';
 
 export default (app) => app
   .get('/users', { name: 'users' }, async (req, reply) => {
-    const users = await app.objection.models.user.query();
+    const users = await app.objection.models.user.query().orderBy('id');
     reply.render('users/list', { users });
     return reply;
   })

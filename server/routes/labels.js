@@ -2,7 +2,7 @@ import i18next from 'i18next';
 
 export default (app) => app
   .get('/labels', { name: 'labels' }, async (req, reply) => {
-    const labels = await app.objection.models.label.query();
+    const labels = await app.objection.models.label.query().orderBy('id');
     reply.render('labels/list', { labels });
     return reply;
   })
@@ -12,11 +12,10 @@ export default (app) => app
   })
   .post('/labels', async (req, reply) => {
     try {
-      const { id } = req.user;
-      const label = await app.objection.models.label.fromJson(req.body.data);
-      const user = await app.objection.models.user.query().findById(id);
+      const { models } = app.objection;
+      const label = await models.label.fromJson(req.body.data);
 
-      await user.$relatedQuery('label').insert(label);
+      await models.label.query().insert(label);
 
       req.flash('info', i18next.t('flash.labels.create.success'));
       reply.redirect(app.reverse('labels'));

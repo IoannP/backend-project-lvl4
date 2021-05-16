@@ -1,56 +1,44 @@
 import { describe } from '@jest/globals';
 import getApp from '../server/index.js';
-import {
-  generateUser,
-  generateStatus,
-  generateTask,
-  generateLabel,
-  insertUser,
-  insertStatus,
-  insertTask,
-  insertLabel,
-} from './helpers.js';
+import { generateEntities, insertEntities } from './helpers.js';
 
 describe('test tasks', () => {
   let app;
   let knex;
   let models;
-  let testuserData;
-  let teststatusData;
-  let testtaskData;
-  let testlabelsData;
-  let testuser;
-  let teststatus;
-  let testtask;
-  let testlabels;
+
+  const userData = generateEntities('user');
+  const statusData = generateEntities('status');
+  const taskData = generateEntities('task');
+  const labelsData = [generateEntities('label'), generateEntities('label')];
+
+  let user;
+  let status;
+  let task;
+  let labels;
 
   beforeAll(async () => {
     app = await getApp();
     knex = app.objection.knex;
     models = app.objection.models;
-    testuserData = generateUser();
-    teststatusData = generateStatus();
-    testtaskData = generateTask();
-    testlabelsData = [generateLabel(), generateLabel()];
 
     app.addHook('preHandler', async (req) => {
-      const user = await models.user.query().findOne({ email: testuser.email });
-      req.user = user;
+      req.user = await models.user.query().findOne({ email: user.email });
     });
   });
 
   beforeEach(async () => {
     await knex.migrate.latest();
-    testuser = await insertUser(app, testuserData);
-    teststatus = await insertStatus(testuser, teststatusData);
-    testlabels = testlabelsData.map(async (labelData) => {
-      const label = await insertLabel(testuser, labelData);
+    user = await insertEntities.user(models, userData);
+    status = await insertEntities.status(models, statusData);
+    labels = labelsData.map(async (labelData) => {
+      const label = await insertEntities.label(models, labelData);
       return label;
     });
 
-    testlabels = await Promise.all(testlabels);
-    testtaskData.statusId = teststatus.id;
-    testtask = await insertTask(testuser, testtaskData, knex);
+    labels = await Promise.all(labels);
+    taskData.statusId = status.id;
+    task = await insertEntities.task(user, taskData, knex);
   });
 
   describe('positive case', () => {
@@ -73,9 +61,9 @@ describe('test tasks', () => {
     });
 
     test('create', async () => {
-      const newTask = generateTask();
-      newTask.statusId = teststatus.id;
-      newTask.labels = testlabels.map((label) => label.id);
+      const newTask = generateEntities('task');
+      newTask.statusId = status.id;
+      newTask.labels = labels.map((label) => label.id);
 
       const { statusCode } = await app.inject({
         method: 'POST',
@@ -87,25 +75,25 @@ describe('test tasks', () => {
 
       expect(statusCode).toBe(302);
 
-      const task = await models.task.query().findOne({ name: newTask.name }).withGraphFetched('labels');
-      const labels = await models.label.query().whereIn('id', task.labels.map((label) => label.id));
-      delete newTask.labels;
+      const createdTask = await models.task.query().findOne({ name: newTask.name }).withGraphFetched('labels');
+      const taskLabels = await models.label.query().whereIn('id', newTask.labels);
+      newTask.labels = taskLabels;
 
-      expect(task.labels).toMatchObject(labels);
-      expect(task).toMatchObject(newTask);
+      expect(createdTask.labels).toMatchObject(taskLabels);
+      expect(createdTask).toMatchObject(newTask);
     });
 
     test('update', async () => {
-      const [label] = testlabels;
+      const [label] = labels;
       const form = {
         name: 'newTaskName',
-        statusId: teststatus.id,
+        statusId: status.id,
         labels: label.id,
       };
 
       const { statusCode } = await app.inject({
         method: 'PATCH',
-        url: `/tasks/${testtask.id}`,
+        url: `/tasks/${task.id}`,
         payload: {
           data: form,
         },
@@ -113,17 +101,16 @@ describe('test tasks', () => {
 
       expect(statusCode).toBe(302);
 
-      const task = await models.task.query().findOne({ name: form.name }).withGraphFetched('labels');
-      const tasklabel = await models.label.query().whereIn('id', task.labels.map((lb) => lb.id));
+      const updatedTask = await models.task.query().findOne({ name: form.name }).withGraphFetched('labels');
+      const taskLabel = await models.label.query().where('id', form.labels);
+      form.labels = taskLabel;
 
-      expect(task.labels).toMatchObject(tasklabel);
-      delete form.labels;
-
-      expect(task).toMatchObject(form);
+      expect(updatedTask.labels).toMatchObject(taskLabel);
+      expect(updatedTask).toMatchObject(form);
     });
 
     test('delete', async () => {
-      const { id } = testtask;
+      const { id } = task;
       const { statusCode } = await app.inject({
         method: 'DELETE',
         url: `/tasks/${id}`,
@@ -131,14 +118,14 @@ describe('test tasks', () => {
 
       expect(statusCode).toBe(302);
 
-      const task = await models.task.query().findById(id);
-      expect(task).toBeUndefined();
+      const deletedTask = await models.task.query().findById(id);
+      expect(deletedTask).toBeUndefined();
     });
   });
 
   describe('negative case', () => {
     test('create', async () => {
-      const newTask = generateTask();
+      const newTask = generateEntities('task');
 
       const { statusCode } = await app.inject({
         method: 'POST',
@@ -150,19 +137,18 @@ describe('test tasks', () => {
 
       expect(statusCode).toBe(302);
 
-      const task = await models.task.query().findOne({ name: newTask.name });
-      expect(task).toBeUndefined();
+      const uncreatedTask = await models.task.query().findOne({ name: newTask.name });
+      expect(uncreatedTask).toBeUndefined();
     });
 
     test('update', async () => {
       const form = {
         name: 'newTaskName',
-        statusId: '',
       };
 
       const { statusCode } = await app.inject({
         method: 'PATCH',
-        url: `/tasks/${testtask.id}`,
+        url: `/tasks/${task.id}`,
         payload: {
           data: form,
         },
@@ -170,9 +156,9 @@ describe('test tasks', () => {
 
       expect(statusCode).toBe(302);
 
-      const task = await models.task.query().findOne({ name: form.name });
+      const unupdatedTask = await models.task.query().findOne({ name: form.name });
 
-      expect(task).toBeUndefined();
+      expect(unupdatedTask).toBeUndefined();
     });
   });
 

@@ -1,21 +1,22 @@
 import { afterEach, describe } from '@jest/globals';
 import getApp from '../server/index.js';
-import { generateUser, insertUser } from './helpers.js';
+import { generateEntities, insertEntities } from './helpers.js';
 
 describe('test sessions', () => {
   let app;
   let knex;
-  let testuser;
+  let models;
+  const user = generateEntities('user');
 
   beforeAll(async () => {
     app = await getApp();
     knex = app.objection.knex;
-    testuser = generateUser();
+    models = app.objection.models;
   });
 
   beforeEach(async () => {
     await knex.migrate.latest();
-    await insertUser(app, testuser);
+    await insertEntities.user(models, user);
   });
 
   describe('positive case', () => {
@@ -26,7 +27,7 @@ describe('test sessions', () => {
       });
 
       expect(response.statusCode).toBe(200);
-      const { email, password } = testuser;
+      const { email, password } = user;
       const { statusCode, cookies } = await app.inject({
         method: 'POST',
         url: app.reverse('session'),
@@ -53,7 +54,7 @@ describe('test sessions', () => {
 
   describe('negative case', () => {
     test('sign in', async () => {
-      const { email } = testuser;
+      const { email } = user;
       const { statusCode } = await app.inject({
         method: 'POST',
         url: app.reverse('session'),

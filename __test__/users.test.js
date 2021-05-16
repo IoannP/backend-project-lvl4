@@ -1,28 +1,36 @@
 import { describe } from '@jest/globals';
 import _ from 'lodash';
 import getApp from '../server/index.js';
-import { generateUser, insertUser } from './helpers.js';
+import { insertEntities, generateEntities } from './helpers.js';
 
 describe('test users', () => {
   let app;
   let knex;
   let models;
-  let testuser;
+
+  let user;
+  let task;
+
+  const userdata = generateEntities('user');
+  const statusdata = generateEntities('status');
+  const taskdata = generateEntities('task');
 
   beforeAll(async () => {
     app = await getApp();
     knex = app.objection.knex;
     models = app.objection.models;
-    testuser = generateUser();
+
     app.addHook('preHandler', async (req) => {
-      const user = await models.user.query().findOne({ email: testuser.email });
-      req.user = user;
+      req.user = await models.user.query().findOne({ email: user.email });
     });
   });
 
   beforeEach(async () => {
     await knex.migrate.latest();
-    await insertUser(app, testuser);
+    user = await insertEntities.user(models, userdata);
+    const { id } = await insertEntities.status(models, statusdata);
+    taskdata.statusId = id;
+    task = await insertEntities.task(user, taskdata, knex);
   });
 
   describe('positive case', () => {
@@ -45,7 +53,7 @@ describe('test users', () => {
     });
 
     test('create', async () => {
-      const newUser = generateUser();
+      const newUser = generateEntities('user');
       const { statusCode } = await app.inject({
         method: 'POST',
         url: app.reverse('users'),
@@ -56,20 +64,19 @@ describe('test users', () => {
 
       expect(statusCode).toBe(302);
 
-      const user = await models.user.query().findOne({ email: newUser.email });
-      const passwordValid = await user.verifyPassword(newUser.password);
+      const createdUser = await models.user.query().findOne({ email: newUser.email });
+      const passwordValid = await createdUser.verifyPassword(newUser.password);
 
       expect(passwordValid).toBeTruthy();
-      expect(user).toMatchObject(_.omit(newUser, 'password'));
+      expect(createdUser).toMatchObject(_.omit(newUser, 'password'));
     });
 
     test('update', async () => {
-      const user = await models.user.query().findOne({ email: testuser.email });
       const updateForm = {
-        firstName: testuser.firstName,
-        lastName: testuser.lastName,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: 'test@mail.com',
-        password: testuser.password,
+        password: user.password,
       };
 
       const { statusCode } = await app.inject({
@@ -83,12 +90,12 @@ describe('test users', () => {
       expect(statusCode).toBe(302);
 
       const updatedUser = await models.user.query().findOne({ email: updateForm.email });
-      expect(updatedUser).toMatchObject(_.omit(updateForm, 'password'));
+      expect(updatedUser).toMatchObject(updateForm);
     });
 
     test('delete', async () => {
-      const { id } = await models.user.query().findOne({ email: testuser.email });
-
+      const { id } = user;
+      await task.$query().delete();
       const { statusCode } = await app.inject({
         method: 'DELETE',
         url: `/users/${id}`,
@@ -96,70 +103,48 @@ describe('test users', () => {
 
       expect(statusCode).toBe(302);
 
-      const user = await models.user.query().findById(id);
-      expect(user).toBeUndefined();
+      expect(await models.user.query().findById(id)).toBeUndefined();
     });
   });
 
   describe('negative case', () => {
     test('create', async () => {
-      const newUser = generateUser();
+      const newUser = generateEntities('user');
       newUser.firstName = '';
 
-      await app.inject({
+      const { statusCode } = await app.inject({
         method: 'POST',
         url: app.reverse('users'),
         payload: {
           data: newUser,
         },
       });
-      const user = await models.user.query().findOne({ email: newUser.email });
-      await expect(user).toBeUndefined();
+
+      expect(statusCode).toBe(200);
+
+      const uncreatedUser = await models.user.query().findOne({ email: newUser.email });
+      expect(uncreatedUser).toBeUndefined();
     });
 
     test('update', async () => {
-      // const user = await models.user.query().findOne({ email: testuser.email });
       const updateForm = {
-        firstName: testuser.firstName,
-        lastName: testuser.lastName,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: 'test@mail.com',
       };
 
       const { statusCode } = await app.inject({
         method: 'PATCH',
-        url: `/users/${testuser.id}`,
+        url: `/users/${user.id}`,
         payload: {
           data: updateForm,
         },
       });
 
       expect(statusCode).toBe(200);
-      const updatedUser = await models.user.query().findOne({ email: updateForm.email });
-      expect(updatedUser).toBeUndefined();
-    });
 
-    test('delete', async () => {
-      const newUser = generateUser();
-      const response = await app.inject({
-        method: 'POST',
-        url: app.reverse('users'),
-        payload: {
-          data: newUser,
-        },
-      });
-
-      expect(response.statusCode).toBe(302);
-
-      const { id } = await models.user.query().findOne({ email: newUser.email });
-      const { statusCode } = await app.inject({
-        method: 'DELETE',
-        url: `/users/${id}`,
-      });
-
-      expect(statusCode).toBe(302);
-
-      const user = await models.user.query().findById(id);
-      expect(user).toMatchObject(_.omit(newUser, 'password'));
+      const unupdatedUser = await models.user.query().findOne({ email: updateForm.email });
+      expect(unupdatedUser).toBeUndefined();
     });
   });
 

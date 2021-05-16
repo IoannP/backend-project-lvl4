@@ -1,8 +1,9 @@
 import i18next from 'i18next';
+import { ForeignKeyViolationError } from 'objection';
 
 export default (app) => app
   .get('/statuses', { name: 'statuses' }, async (req, reply) => {
-    const statuses = await app.objection.models.status.query();
+    const statuses = await app.objection.models.status.query().orderBy('id');
     reply.render('statuses/list', { statuses });
     return reply;
   })
@@ -12,13 +13,11 @@ export default (app) => app
   })
   .post('/statuses', async (req, reply) => {
     try {
-      const { id } = req.user;
       const { models } = app.objection;
 
       const status = await models.status.fromJson(req.body.data);
-      const user = await models.user.query().findById(id);
 
-      await user.$relatedQuery('status').insert(status);
+      await models.status.query().insert(status);
 
       req.flash('info', i18next.t('flash.statuses.create.success'));
       reply.redirect(app.reverse('statuses'));
@@ -59,8 +58,14 @@ export default (app) => app
   })
   .delete('/statuses/:id', async (req, reply) => {
     const { id } = req.params;
-    await app.objection.models.status.query().deleteById(id);
-    req.flash('info', i18next.t('flash.statuses.delete.success'));
+    try {
+      await app.objection.models.status.query().deleteById(id);
+      req.flash('info', i18next.t('flash.statuses.delete.success'));
+    } catch (error) {
+      if (error instanceof ForeignKeyViolationError) req.flash('error', i18next.t('flash.statuses.delete.error'));
+      else throw error;
+    }
+
     reply.redirect(app.reverse('statuses'));
     return reply;
   });

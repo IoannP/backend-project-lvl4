@@ -5,6 +5,7 @@
 
 # Task Manager
 ### Четвёртый проект на [Hexlet](https://ru.hexlet.io/programs/backend/projects/6)
+### Проект: https://study-task-manager.herokuapp.com/
 ### Настройка проекта:
 
 Установка
@@ -12,3 +13,5 @@
 
 Запуск локально
 > `make start`
+
+

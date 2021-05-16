@@ -11,11 +11,9 @@ exports.up = (knex) => knex.schema.createTable('users', (table) => {
   .createTable('statuses', (table) => {
     table.increments('id').unsigned().primary();
     table.string('name').notNullable();
-    table.integer('creator_id').notNullable();
     table.string('created_at').defaultTo(knex.fn.now());
     table.string('updated_at');
     table.unique('name');
-    table.foreign('creator_id').references('id').inTable('users');
   })
   .createTable('tasks', (table) => {
     table.increments('id').unsigned().primary();
@@ -33,12 +31,10 @@ exports.up = (knex) => knex.schema.createTable('users', (table) => {
   })
   .createTable('labels', (table) => {
     table.increments('id').unsigned().primary();
-    table.integer('creator_id');
     table.string('name').notNullable();
     table.string('created_at').defaultTo(knex.fn.now());
     table.string('updated_at');
     table.unique('name');
-    table.foreign('creator_id').references('id').inTable('users');
   })
   .createTable('task_labels', (table) => {
     table.integer('task_id');

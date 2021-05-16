@@ -1,36 +1,36 @@
 import { describe } from '@jest/globals';
 import getApp from '../server/index.js';
-import {
-  generateUser,
-  generateStatus,
-  insertUser,
-  insertStatus,
-} from './helpers.js';
+import { generateEntities, insertEntities } from './helpers.js';
 
 describe('test statuses', () => {
   let app;
   let knex;
   let models;
-  let testuser;
-  let teststatus;
+
+  const userdata = generateEntities('user');
+  const statusdata = generateEntities('status');
+  const taskdata = generateEntities('task');
+
+  let user;
+  let status;
+  let task;
 
   beforeAll(async () => {
     app = await getApp();
     knex = app.objection.knex;
     models = app.objection.models;
-    testuser = generateUser();
-    teststatus = generateStatus();
 
     app.addHook('preHandler', async (req) => {
-      const user = await models.user.query().findOne({ email: testuser.email });
-      req.user = user;
+      req.user = await models.user.query().findOne({ email: user.email });
     });
   });
 
   beforeEach(async () => {
     await knex.migrate.latest();
-    const user = await insertUser(app, testuser);
-    await insertStatus(user, teststatus);
+    user = await insertEntities.user(models, userdata);
+    status = await insertEntities.status(models, statusdata);
+    taskdata.statusId = status.id;
+    task = await insertEntities.task(user, taskdata, knex);
   });
 
   describe('positive case', () => {
@@ -53,7 +53,7 @@ describe('test statuses', () => {
     });
 
     it('create', async () => {
-      const newStatus = generateStatus();
+      const newStatus = generateEntities('status');
       const { statusCode } = await app.inject({
         method: 'POST',
         url: app.reverse('statuses'),
@@ -64,13 +64,13 @@ describe('test statuses', () => {
 
       expect(statusCode).toBe(302);
 
-      const status = await models.status.query().findOne({ name: newStatus.name });
+      const createdStatus = await models.status.query().findOne({ name: newStatus.name });
 
-      expect(status).toMatchObject(newStatus);
+      expect(createdStatus).toMatchObject(newStatus);
     });
 
     it('update', async () => {
-      const { id } = await models.status.query().findOne({ name: teststatus.name });
+      const { id } = status;
       const updateForm = { name: 'newStatusName' };
 
       const { statusCode } = await app.inject({
@@ -88,8 +88,9 @@ describe('test statuses', () => {
     });
 
     it('delete', async () => {
-      const { id } = await models.status.query().findOne({ name: teststatus.name });
-      await app.objection.models.status.query().deleteById(id);
+      await task.$query().delete();
+      const { id } = status;
+
       const { statusCode } = await app.inject({
         method: 'DELETE',
         url: `/statuses/${id}`,
@@ -97,8 +98,8 @@ describe('test statuses', () => {
 
       expect(statusCode).toBe(302);
 
-      const status = await models.status.query().findById(id);
-      expect(status).toBeUndefined();
+      const deletedStatus = await models.status.query().findById(id);
+      expect(deletedStatus).toBeUndefined();
     });
   });
 
@@ -115,18 +116,16 @@ describe('test statuses', () => {
 
       expect(statusCode).toBe(200);
 
-      const status = await models.status.query().findOne({ name: newStatus.name });
+      const uncreatedStatus = await models.status.query().findOne({ name: newStatus.name });
 
-      expect(status).toBeUndefined();
+      expect(uncreatedStatus).toBeUndefined();
     });
 
     it('update', async () => {
-      const { id } = await models.status.query().findOne({ name: teststatus.name });
       const updateForm = { name: '' };
-
       const { statusCode } = await app.inject({
         method: 'PATCH',
-        url: `/statuses/${id}`,
+        url: `/statuses/${status.id}`,
         payload: {
           data: updateForm,
         },
@@ -134,8 +133,8 @@ describe('test statuses', () => {
 
       expect(statusCode).toBe(200);
 
-      const updatedStatus = await models.status.query().findOne({ name: updateForm.name });
-      expect(updatedStatus).toBeUndefined();
+      const unupdatedStatus = await models.status.query().findOne({ name: updateForm.name });
+      expect(unupdatedStatus).toBeUndefined();
     });
   });
 
