@@ -80,6 +80,7 @@ export default (app) => app
       return reply;
     }
 
+    
     try {
       await app.objection.models.user.query().deleteById(id);
       req.logOut();
