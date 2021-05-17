@@ -15,7 +15,7 @@ module.exports = () => ({
       database: env.PROD_DB_NAME,
       host: env.PROD_DB_HOST,
       port: env.PROD_DB_PORT,
-      database_url: env.PROD_DB_URL,
+      database_url: env.DATABASE_URL,
       ssl: {
         rejectUnauthorized: false,
       },
