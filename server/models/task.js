@@ -1,7 +1,9 @@
 import path from 'path';
-import { Model, AjvValidator } from 'objection';
-// import objectionUnique from 'objection-unique';
+import * as yup from 'yup';
+import { Model } from 'objection';
+import Validator from '../lib/validator';
 
+// import objectionUnique from 'objection-unique';
 // const unique = objectionUnique({ fields: ['name'] });
 
 export default class Task extends Model {
@@ -27,16 +29,7 @@ export default class Task extends Model {
   }
 
   static createValidator() {
-    return new AjvValidator({
-      onCreateAjv: (avj) => avj,
-      options: {
-        allErrors: true,
-        validateSchema: true,
-        ownProperties: true,
-        coerceTypes: 'array',
-        nullable: true,
-      },
-    });
+    return new Validator();
   }
 
   async $beforeUpdate() {
@@ -45,16 +38,11 @@ export default class Task extends Model {
 
   static get jsonSchema() {
     return {
-      type: 'object',
-      required: ['name', 'statusId'],
-      properties: {
-        name: { type: 'string', minLength: 1, maxLength: 255 },
-        creatorId: { type: 'integer' },
-        description: { type: 'string' },
-        performerId: { type: 'integer' },
-        statusId: { type: 'integer', minimum: 1, default: null },
-        labels: { type: 'array', default: [] },
-      },
+      name: yup.string().required().min(1).max(255),
+      description: yup.string().default(null).nullable(),
+      executorId: yup.number().integer().default(null).nullable(),
+      statusId: yup.number().integer().required(),
+      labels: yup.array().default([]).ensure(),
     };
   }
 

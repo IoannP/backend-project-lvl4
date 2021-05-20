@@ -78,6 +78,7 @@ export default (app) => app
       if (error instanceof UniqueViolationError) {
         error.data = { name: [{ message: 'name already in use' }] };
       }
+
       req.flash('error', i18next.t('flash.tasks.create.error'));
       req.errors(error.data);
       req.entity('task', req.body.data);
@@ -127,7 +128,6 @@ export default (app) => app
       await knex.transaction(async (trx) => {
         await models.task.query(trx).upsertGraph(updateData, {
           relate: true,
-          update: true,
           unrelate: true,
         });
       });

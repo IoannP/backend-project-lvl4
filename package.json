@@ -61,7 +61,8 @@
       "rollbar": "^2.21.1",
       "sqlite3": "^5.0.2",
       "webpack": "^5.27.0",
-      "youch": "^2.2.1"
+      "youch": "^2.2.1",
+      "yup": "^0.32.9"
    },
    "devDependencies": {
       "@babel/cli": "^7.13.10",
