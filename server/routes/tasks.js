@@ -128,6 +128,7 @@ export default (app) => app
       await knex.transaction(async (trx) => {
         await models.task.query(trx).upsertGraph(updateData, {
           relate: true,
+          update: true,
           unrelate: true,
         });
       });

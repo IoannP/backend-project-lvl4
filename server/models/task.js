@@ -33,7 +33,7 @@ export default class Task extends Model {
   }
 
   async $beforeUpdate() {
-    this.updatedAt = new Date().toLocaleString();
+    this.updatedAt = new Date();
   }
 
   static get jsonSchema() {
