@@ -36,14 +36,6 @@ export default class User extends unique(password(Model)) {
 
   static get relationMappings() {
     return {
-      status: {
-        relation: Model.HasManyRelation,
-        modelClass: path.join(__dirname, 'status'),
-        join: {
-          from: 'users.id',
-          to: 'statuses.creator_id',
-        },
-      },
       task: {
         relation: Model.HasManyRelation,
         modelClass: path.join(__dirname, 'task'),
@@ -58,14 +50,6 @@ export default class User extends unique(password(Model)) {
         join: {
           from: 'users.id',
           to: 'tasks.executor_id',
-        },
-      },
-      label: {
-        relation: Model.HasManyRelation,
-        modelClass: path.join(__dirname, 'label'),
-        join: {
-          from: 'users.id',
-          to: 'labels.creator_id',
         },
       },
     };
