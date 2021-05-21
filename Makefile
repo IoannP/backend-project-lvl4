@@ -16,6 +16,9 @@ db-migrate:
 build:
 	npm run build
 
+prebuild:
+	npm run prebuild
+
 start:
 	heroku local -f Procfile.dev
 
